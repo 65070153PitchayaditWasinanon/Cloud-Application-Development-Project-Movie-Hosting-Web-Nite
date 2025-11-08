@@ -7,6 +7,7 @@ import Authlayout from "./layouts/Authlayout.jsx"
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from './pages/Home.jsx'
+import Payment from './pages/Payment.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 
@@ -16,6 +17,7 @@ createRoot(document.getElementById('root')).render(
     <Routes>
       <Route element={<Navlayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/payment" element={<Payment />} />
       </Route>
 
       <Route element={<Authlayout />}>
