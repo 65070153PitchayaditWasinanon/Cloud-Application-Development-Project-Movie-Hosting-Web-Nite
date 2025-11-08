@@ -6,7 +6,7 @@ const Navlayout = () => {
     return (
         <div>
             <Navbar />
-            <main className="p-6">
+            <main className="overflow-y-hidden">
                 <Outlet />
             </main>
         </div>
