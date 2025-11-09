@@ -1,56 +1,15 @@
 import React from 'react'
 import IMG from '../assets/templatehome.png'
 import PLAY from '../assets/BlackTriangle.png'
-import Preview from '../assets/preview.png'
-import { useRef } from "react";
-
-const MovieList = ({ title }) => {
-  const rowRef = useRef(null);
-  const scrollByCards = (dir = 1) => {
-    const row = rowRef.current;
-    if (!row) return;
-    const firstCard = row.querySelector(":scope > *");
-    const cardW = firstCard?.getBoundingClientRect().width ?? 320; // ชัวร์กว่า
-    const gap = 16; // space-x-4 = 1rem = 16px
-    row.scrollBy({ left: dir * (cardW + gap) * 3, behavior: "smooth" });
-  };
-
-  return (
-    <div className="ml-[120px] mt-[60px]">
-      <p className="text-2xl text-[#3D4979]">{title}</p>
-      <div className="relative">
-        <button
-          onClick={() => scrollByCards(-1)}
-          className="absolute left-5 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-black/50 text-white hover:bg-black/70"
-        >
-          ‹
-        </button>
-
-        <div
-          ref={rowRef}
-          className="flex overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory space-x-4 p-4 scroll-pl-4"
-        >
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden">
-              <img src={Preview} alt="" className="w-full h-full object-cover" />
-            </div>
-          ))}
-        </div>
-
-        <button
-          onClick={() => scrollByCards(1)}
-          className="absolute right-5 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-black/50 text-white hover:bg-black/70"
-        >
-          ›
-        </button>
-      </div>
-    </div>
-  );
-}
-
+import { useState } from "react";
+import MovieList from '../components/MovieList';
+import Check from '../assets/check_small.png'
+import Comment from '../assets/comment.png'
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
-
+  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   return (
     <div >
       {/* wallpaper */}
@@ -74,10 +33,43 @@ const Home = () => {
 
 
       {/* list หนังหมา */}
-      <MovieList title="รับชมต่อ" />
-      <MovieList title="ภาพยนตร์ติด Top" />
+      <MovieList title="รับชมต่อ" setIsOpen={setIsOpen} />
+      <MovieList title="ภาพยนตร์ติด Top" setIsOpen={setIsOpen} />
 
+      {
+        isOpen && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+            <div className="grid grid-rows-3 bg-[#3D4979] rounded-lg shadow-lg  w-180 h-130 text-center relative">
 
+              <div className='relative row-span-2 w-full h-full overflow-hidden'>
+                <img src={IMG} className='w-full h-full object-cover' />
+                <div className='absolute top-2 left-2' onClick={() => { setIsOpen(false) }}>
+                  <p className='text-2xl text-white hover:text-gray-500'>x</p>
+                </div>
+              </div>
+
+              <div className='row-span-2 pt-4 pl-8 text-start text-white'>
+                <p className='text-2xl font-bold'>JOHN WICK</p>
+                <p className='text-sm leading-relaxed pt-2'>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio eius pariatur quia, facere consectetur quam quas architecto quis accusamus amet fugit consequuntur, aut officiis libero doloremque voluptatum quos laborum harum?</p>
+              </div>
+
+              <div className='flex row-span-1 text-white text-xl space-x-4 justify-end  pr-4 pb-2'>
+
+                <div className='flex items-center' onClick={()=> navigate("/payment")}>
+                  <img src={Check} alt="" className='h-6 w-6'/>
+                  <p>Buy</p>
+                </div>
+
+                <div className='flex items-center'onClick={()=> navigate("/review")}>
+                  <img src={Comment} alt="" className='h-6 w-6'/>
+                  <p>Review</p>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        )
+      }
 
 
 
