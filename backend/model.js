@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
+const { Schema } = mongoose;
+
+const userSchema = new Schema({
   _id: {
     type: Number,
     required: true,
@@ -25,7 +27,7 @@ const userSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-const movieSchema = new mongoose.Schema({
+const movieSchema = new Schema({
   _id: {
     type: Number,
     required: true
@@ -40,7 +42,7 @@ const movieSchema = new mongoose.Schema({
   },
   imagePath: {
     type: String,
-    require: true
+    required: true
   },
   rentalPrice: {
     type: Number,
@@ -48,8 +50,157 @@ const movieSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+const reviewSchema = new Schema({
+  _id: { 
+    type: String, 
+    required: true 
+  },
+  movieId: { 
+    type: Number,  
+    ref: "Movie", 
+    required: true 
+  },
+  userId: { 
+    type: Number,  
+    ref: "User", 
+    required: true 
+  },
+  comment: { 
+    type: String, 
+    required: true 
+  },
+  reviewDate: { 
+    type: Date, 
+    default: Date.now 
+  },
+  username: { 
+    type: String 
+  },
+}, { timestamps: true });
 
-// เชื่อมต่อ MongoDB (ถ้าใช้ DynamoDB เดี๋ยวเปลี่ยน)
+const promotionSchema = new Schema({
+  _id: { 
+    type: String, 
+    required: true 
+  },
+  name: { 
+    type: String, 
+    required: true 
+  },
+  description: { 
+    type: String 
+  },
+  discountType: { 
+    type: String,  
+    required: true 
+  },
+  discountValue: { 
+    type: Number, 
+    required: true 
+  },
+  pointUsage: { 
+    type: Number, 
+    default: 0 
+  },
+  code: { 
+    type: String, 
+    required: true, 
+    unique: true 
+  },
+  startDate: { 
+    type: Date, 
+    required: true 
+  },
+  endDate: { 
+    type: Date, 
+    required: true 
+  },
+}, { timestamps: true });
+
+const rentalSchema = new Schema({
+  _id: { 
+    type: String, 
+    required: true 
+  },
+  userId: { 
+    type: Number, 
+    ref: "User", 
+    required: true 
+  },
+  status: { 
+    type: String, 
+    enum: ["ACTIVE", "COMPLETED"], 
+    default: "ACTIVE" 
+  },
+  rentalDate: { 
+    type: Date, 
+    required: true 
+  },
+  dueDate: { 
+    type: Date, 
+    required: true 
+  },
+
+  movie: {
+    movieId: { 
+      type: Number, 
+      ref: "Movie", 
+      required: true 
+    },
+    title: { 
+      type: String, 
+      required: true 
+    },
+    rentalPriceAtTime: { 
+      type: Number, 
+      required: true 
+    },
+  },
+
+  payment: {
+    paymentId: { 
+      type: String, 
+      required: true 
+    },
+    originalAmount: { 
+      type: Number, 
+      required: true 
+    },
+    amountPaid: { 
+      type: Number, 
+      required: true 
+    },
+    paymentMethod: { 
+      type: String, 
+      required: true 
+    },
+    paymentDate: { 
+      type: Date, 
+      required: true 
+    },
+    promotionUsed: {
+      promotionId: { 
+        type: String, 
+        ref: "Promotion" 
+      },
+      code: { 
+        type: String 
+      },
+      discountAmount: { 
+        type: Number, 
+        default: 0 
+      },
+      pointUsage: {
+        type: Number,
+      }
+    },
+  },
+}, { timestamps: true });
+
 const User = mongoose.model("User", userSchema);
-const Movie = mongoose.model('Movie', movieSchema);
-export { User, Movie };
+const Movie = mongoose.model("Movie", movieSchema);
+const Review = mongoose.model("Review", reviewSchema);
+const Promotion = mongoose.model("Promotion", promotionSchema);
+const Rental = mongoose.model("Rental", rentalSchema);
+
+export { User, Movie, Review, Promotion, Rental };
