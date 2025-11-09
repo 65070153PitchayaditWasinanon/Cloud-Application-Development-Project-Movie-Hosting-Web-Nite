@@ -10,6 +10,7 @@ import Home from './pages/Home.jsx'
 import Payment from './pages/Payment.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
+import Promotion from './pages/Promotion.jsx'
 
 
 createRoot(document.getElementById('root')).render(
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')).render(
       <Route element={<Navlayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/payment" element={<Payment />} />
+        <Route path="/promotion" element={<Promotion />} />
       </Route>
 
       <Route element={<Authlayout />}>

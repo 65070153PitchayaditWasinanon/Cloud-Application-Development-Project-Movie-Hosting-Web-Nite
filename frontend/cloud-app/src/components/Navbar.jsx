@@ -34,7 +34,7 @@ export default function Navbar() {
 
             <div className="flex flex-row space-x-8 justify-end pr-8">
                 <div className="flex flex-row space-x-2 items-center ml-8">
-                    <NavLink to="/" className="flex items-center gap-2 text-[#3D4979]">
+                    <NavLink to="/promotion" className="flex items-center gap-2 text-[#3D4979]">
                         <img src={Gift} alt="Gift" className="h-8 w-8" />
                         <span >Promotion</span>
                     </NavLink>
