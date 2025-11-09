@@ -3,10 +3,6 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-  _id: {
-    type: Number,
-    required: true,
-  },
   username: {
     type: String,
     required: true,
@@ -28,10 +24,6 @@ const userSchema = new Schema({
 }, { timestamps: true });
 
 const movieSchema = new Schema({
-  _id: {
-    type: Number,
-    required: true
-  },
   title: {
     type: String,
     required: true
@@ -51,10 +43,6 @@ const movieSchema = new Schema({
 }, { timestamps: true });
 
 const reviewSchema = new Schema({
-  _id: { 
-    type: String, 
-    required: true 
-  },
   movieId: { 
     type: Number,  
     ref: "Movie", 
@@ -79,10 +67,6 @@ const reviewSchema = new Schema({
 }, { timestamps: true });
 
 const promotionSchema = new Schema({
-  _id: { 
-    type: String, 
-    required: true 
-  },
   name: { 
     type: String, 
     required: true 
@@ -118,10 +102,6 @@ const promotionSchema = new Schema({
 }, { timestamps: true });
 
 const rentalSchema = new Schema({
-  _id: { 
-    type: String, 
-    required: true 
-  },
   userId: { 
     type: Number, 
     ref: "User", 
