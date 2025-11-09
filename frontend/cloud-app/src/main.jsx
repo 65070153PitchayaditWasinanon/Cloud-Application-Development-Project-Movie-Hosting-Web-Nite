@@ -11,6 +11,7 @@ import Payment from './pages/Payment.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import Promotion from './pages/Promotion.jsx'
+import Review from './pages/Review.jsx'
 
 
 createRoot(document.getElementById('root')).render(
@@ -20,6 +21,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<Home />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/promotion" element={<Promotion />} />
+        <Route path="/review" element={<Review />} />
       </Route>
 
       <Route element={<Authlayout />}>
