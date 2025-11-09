@@ -1,6 +1,8 @@
+import React, { useState } from 'react'; 
 import IMG from '../assets/preview.png';
 
 const Payment = () => {
+    const [selectedMethod, setSelectedMethod] = useState('credit_card');
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
 
@@ -24,10 +26,50 @@ const Payment = () => {
                     <hr className="my-4 border-0 h-1.5 bg-[#3D4979]" />
 
                 </div>
-                {/* ทำไง:) */}
                 <h1 className="mb-6 font-bold text-blue-950 text-3xl ">
                     เลือกวิธีการชำระเงิน
                 </h1>
+                <div className="space-y-4">
+                    {/* QR พร้อมเพย์ */}
+                    <div
+                        className={`border rounded-lg p-4 cursor-pointer ${selectedMethod === 'qr_promptpay' ? 'border-2 border-[#3D4979]' : 'border-gray-300'
+                            }`}
+                        onClick={() => setSelectedMethod('qr_promptpay')}
+                    >
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-4">
+                                <div className="w-5 h-5 border-2 rounded-full flex items-center justify-center">
+                                    {selectedMethod === 'qr_promptpay' && <div className="w-3 h-3 bg-[#3D4979] rounded-full"></div>}
+                                </div>
+                                <span className="font-semibold text-gray-800">QR พร้อมเพย์</span>
+                            </div>
+                            <div className="flex gap-2">
+                                <span className="text-xs font-bold text-gray-500">PromptPay</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* แอปธนาคาร */}
+                    <div
+                        className={`border rounded-lg p-4 cursor-pointer ${selectedMethod === 'bank_app' ? 'border-2 border-[#3D4979]' : 'border-gray-300'
+                            }`}
+                        onClick={() => setSelectedMethod('bank_app')}
+                    >
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-4">
+                                <div className="w-5 h-5 border-2 rounded-full flex items-center justify-center">
+                                    {selectedMethod === 'bank_app' && <div className="w-3 h-3 bg-[#3D4979] rounded-full"></div>}
+                                </div>
+                                <span className="font-semibold text-gray-800">แอปธนาคาร</span>
+                            </div>
+                            <div className="flex gap-2">
+                                <span className="text-xs font-bold text-gray-500">K+</span>
+                                <span className="text-xs font-bold text-gray-500">SCB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
                 <button className="w-full font-bold bg-[#3D4979] text-white py-3 rounded-lg mt-8  text-lg ">
                     ชำระเงิน
                 </button>
@@ -42,7 +84,7 @@ const Payment = () => {
                     <img
                         src={IMG}
                         alt="Tenet Poster"
-                        className="w-[100px] h-[150px] object-cover rounded-lg"
+                        className=" rounded-lg"
                     />
                     <div>
                         <h3 className="text-xl font-semibold">TENET (2020)</h3>
