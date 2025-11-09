@@ -1,4 +1,3 @@
-// models/User.js
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -26,6 +25,27 @@ const userSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+const movieSchema = new mongoose.Schema({
+  _id: {
+    type: Number,
+    required: true
+  },
+  title: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  rentalPrice: {
+    type: Number,
+    required: true
+  }
+}, { timestamps: true });
+
+
 // เชื่อมต่อ MongoDB (ถ้าใช้ DynamoDB เดี๋ยวเปลี่ยน)
 const User = mongoose.model("User", userSchema);
-export default User;
+const Movie = mongoose.model('Movie', movieSchema);
+export { User, Movie };

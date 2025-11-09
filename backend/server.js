@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
+import { User, Movie } from './model.js';
 
 dotenv.config();
 
@@ -10,32 +11,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// เชื่อมต่อ MongoDB (ถ้าใช้ DynamoDB เดี๋ยวเปลี่ยน)
+// เชื่อม MongoDB (เปลี่ยนตอนใช้ DynamoDB)
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB error:", err));
 
-//User Schema
-import { Schema } from "mongoose";
-
-const userSchema = new Schema({
-  _id: { type: String, required: true },
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  passwordHash: { type: String, required: true },
-  promotionPoint: { type: Number, default: 0 },
-}, { timestamps: true });
-
-const User = mongoose.model("users", userSchema);
-
-// User Routes
 const userRouter = express.Router();
 
-// GET all users (ไม่ส่ง passwordHash)
+// GET all users (ไม่เอา passwordHash)
 userRouter.get("/users", async (req, res) => {
   try {
-    const users = await User.find({}); // exclude passwordHash
+    const users = await User.find({}, { passwordHash: 0 });
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -57,14 +44,13 @@ userRouter.get("/users/:id", async (req, res) => {
 userRouter.post("/users_create", async (req, res) => {
   try {
     const { _id, username, email, passwordHash, promotionPoint } = req.body;
-
     const hashedPassword = await bcrypt.hash(passwordHash, 10);
 
     const newUser = new User({
       _id,
       username,
       email,
-      passwordHash: hashedPassword, // เก็บ hashed password
+      passwordHash: hashedPassword,
       promotionPoint: promotionPoint || 0,
     });
 
@@ -75,10 +61,46 @@ userRouter.post("/users_create", async (req, res) => {
   }
 });
 
-// Use Routes
 app.use("/api", userRouter);
 
-// Start Server
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on http://localhost:${process.env.PORT}`);
+const movieRouter = express.Router();
+
+// GET all movies
+movieRouter.get("/movies", async (req, res) => {
+  try {
+    const movies = await Movie.find({});
+    res.json(movies);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET movie by ID
+movieRouter.get("/movies/:id", async (req, res) => {
+  try {
+    const movie = await Movie.findById(req.params.id);
+    if (!movie) return res.status(404).json({ message: "Movie not found" });
+    res.json(movie);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST create new movie
+movieRouter.post("/movies_create", async (req, res) => {
+  try {
+    const { _id, title, description, rentalPrice } = req.body;
+
+    const newMovie = new Movie({ _id, title, description, rentalPrice });
+    const savedMovie = await newMovie.save();
+    res.status(201).json(savedMovie);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+app.use("/api", movieRouter);
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);
 });
