@@ -89,9 +89,9 @@ movieRouter.get("/movies/:id", async (req, res) => {
 // POST create new movie
 movieRouter.post("/movies_create", async (req, res) => {
   try {
-    const { _id, title, description, rentalPrice } = req.body;
+    const { _id, title, description, imagePath, rentalPrice } = req.body;
 
-    const newMovie = new Movie({ _id, title, description, rentalPrice });
+    const newMovie = new Movie({ _id, title, description, imagePath, rentalPrice });
     const savedMovie = await newMovie.save();
     res.status(201).json(savedMovie);
   } catch (err) {

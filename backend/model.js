@@ -38,6 +38,10 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  imagePath: {
+    type: String,
+    require: true
+  },
   rentalPrice: {
     type: Number,
     required: true
