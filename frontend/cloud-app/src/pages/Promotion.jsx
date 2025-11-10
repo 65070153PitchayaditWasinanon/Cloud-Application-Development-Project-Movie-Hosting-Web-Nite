@@ -1,10 +1,5 @@
 import PLAY from '../assets/BlackTriangle.png'
 import POSTER1 from '../assets/templatepromotion.jpg'
-import Gift from "../assets/Gift.png"
-import Film from "../assets/Film.png"
-import Star from "../assets/Star.png"
-import Zap from "../assets/Zap.png"
-import Clock from "../assets/Clock.png"
 import { useState, useEffect } from "react";
 import PromotionList from '../components/PromotionList';
 import axios from "axios";
