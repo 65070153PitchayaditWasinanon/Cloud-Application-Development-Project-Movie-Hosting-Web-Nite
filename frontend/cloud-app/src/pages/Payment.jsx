@@ -20,15 +20,29 @@ const Payment = () => {
     const [pointDiscount, setPointDiscount] = useState(0);
     const [finalPrice, setFinalPrice] = useState(0);
     const [rentalPeriod, setRentalPeriod] = useState("");
-    const [pointsUsedText, setPointsUsedText] = useState("แต้มโปรโมชั่น (5 ฟรี 1)"); 
-    const [pointsRemaining, setPointsRemaining] = useState(0); 
+    const [pointsUsedText, setPointsUsedText] = useState("แต้มโปรโมชั่น (5 ฟรี 1)");
+    const [pointsRemaining, setPointsRemaining] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const authUserString = localStorage.getItem("authUser");
+                if (!authUserString) {
+                    console.error("User not logged in!");
+                    alert("กรุณาเข้าสู่ระบบก่อนทำการชำระเงิน");
+                    navigate('/login'); 
+                    return;
+                }
+                const authUser = JSON.parse(authUserString);
+                const userId = authUser._id;
+                if (!userId) {
+                    console.error("User ID not found in localStorage!");
+                    navigate('/login');
+                    return;
+                }
                 const [movieRes, userRes] = await Promise.all([
-                    axios.get("http://localhost:5000/api/movies/" + id),
-                    axios.get("http://localhost:5000/api/users/69125b29b4f243ce75c3870a")
+                    axios.get(`http://localhost:5000/api/movies/${id}`),
+                    axios.get(`http://localhost:5000/api/users/${userId}`) 
                 ])
 
                 console.log("Movie Data:", movieRes.data);
@@ -45,7 +59,7 @@ const Payment = () => {
         fetchData()
     }, [id])
 
-    {/* คำนวณเช่า 1 เดือนกับแต้มโปรโมชั่น 5 ฟรี 1 */}
+    {/* คำนวณเช่า 1 เดือนกับแต้มโปรโมชั่น 5 ฟรี 1 */ }
     useEffect(() => {
         const rentalDate = new Date();
         const dueDate = new Date();
@@ -71,6 +85,43 @@ const Payment = () => {
         setPointsUsedText(calculatedPointsUsedText);
 
     }, [movie, user]);
+
+    const handlePayment = async () => {
+        try {
+            const rentalDate = new Date();
+            const dueDate = new Date();
+            dueDate.setMonth(rentalDate.getMonth() + 1);
+
+            const rentalPayload = {
+                userId: user._id,
+                status: "ACTIVE",
+                rentalDate: rentalDate.toISOString(),
+                dueDate: dueDate.toISOString(),
+                movie: {
+                    movieId: movie._id,
+                    title: movie.title,
+                    rentalPriceAtTime: movie.rentalPrice
+                },
+                payment: {
+                    originalAmount: movie.rentalPrice,
+                    amountPaid: finalPrice,
+                    paymentMethod: selectedMethod,
+                    paymentDate: rentalDate.toISOString(),
+                    promotionUsed: pointDiscount > 0 ? {
+                        code: "",
+                        discountAmount: pointDiscount,
+                        pointUsage: 5
+                    } : null
+                }
+            };
+            await axios.post("http://localhost:5000/api/rentals", rentalPayload);
+            alert("ชำระเงินสำเร็จ!");
+            navigate('/');
+        } catch (error) {
+            console.error("Payment failed:", error);
+            alert("การชำระเงินล้มเหลว กรุณาลองใหม่อีกครั้ง");
+        }
+    };
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
 
@@ -138,7 +189,9 @@ const Payment = () => {
                     </div>
 
                 </div>
-                <button className="w-full font-bold bg-[#3D4979] text-white py-3 rounded-lg mt-8  text-lg ">
+                <button
+                    onClick={handlePayment} // <-- เพิ่ม onClick
+                    className="w-full font-bold bg-[#3D4979] text-white py-3 rounded-lg mt-8  text-lg ">
                     ชำระเงิน
                 </button>
             </div>

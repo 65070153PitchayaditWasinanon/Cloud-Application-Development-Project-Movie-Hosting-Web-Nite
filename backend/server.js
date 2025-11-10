@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User, Movie, Promotion } from "./model.js";
+import { User, Movie, Promotion, Rental } from "./model.js";
 
 dotenv.config();
 
@@ -173,6 +173,33 @@ movieRouter.get("/promotions", async (req, res) => {
 });
 
 app.use("/api", movieRouter);
+
+// POST Rental
+const rentalRouter = express.Router();
+rentalRouter.post("/rentals", async (req, res) => {
+  try {
+    const rentalData = req.body;
+    const user = await User.findById(rentalData.userId);
+    console.log("Rental Data:", rentalData);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    await user.save();
+    await Movie.updateOne(
+      { _id: rentalData.movie.movieId },
+      { $inc: { rentalCount: 1 } }
+    );
+    const newRental = new Rental(rentalData);
+    const savedRental = await newRental.save();
+
+    res.status(201).json(savedRental);
+
+  } catch (err) {
+    console.error("Rental creation error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+app.use("/api", rentalRouter);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);
