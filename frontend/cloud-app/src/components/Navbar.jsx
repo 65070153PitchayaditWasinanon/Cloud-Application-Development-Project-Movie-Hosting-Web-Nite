@@ -1,4 +1,4 @@
-import { NavLink, useSearchParams  } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Home from "../assets/Home.png"
 import Search from "../assets/Search.png"
@@ -8,14 +8,22 @@ export default function Navbar() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [text, setText] = useState(searchParams.get("q") || "");
 
-    useEffect(()=>{
-        const timeout = setTimeout(()=>{
+    useEffect(() => {
+        const timeout = setTimeout(() => {
             const q = text.trim();
-            if(q) setSearchParams({q});
-            else setSearchParams({});
-        }, 300);
+            const current = searchParams.get("q") || "";
+
+            if (!q && current) {
+                setSearchParams({});
+                return;
+            }
+            if (q && q !== current) {
+                setSearchParams({ q });
+            }
+        }, 200);
+
         return () => clearTimeout(timeout);
-    }, [text, setSearchParams])
+    }, [text, setSearchParams, searchParams]);
     return (
         <nav className="px-4 py-4 bg-white grid grid-cols-3 items-center">
 
@@ -29,11 +37,12 @@ export default function Navbar() {
                 <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
                     <input
                         type="text"
+                        value={text}
                         placeholder="Search..."
                         className="
                          bg-gray-100 focus:outline-none text-gray-700 placeholder-gray-400
                         max-h-10"
-                        onChange={(e)=>{setText(e.target.value)}}
+                        onChange={(e) => { setText(e.target.value) }}
                     />
                     <img src={Search} alt="search" className="w-6 h-6 text-gray-500" />
                 </div>

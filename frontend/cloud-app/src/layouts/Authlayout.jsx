@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 const Authlayout = () => {
     return (
         <div>
-            <main className="p-6">
+            <main className="">
                 <Outlet />
             </main>
         </div>

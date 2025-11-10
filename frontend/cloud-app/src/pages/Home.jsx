@@ -5,19 +5,46 @@ import { useState, useEffect } from "react";
 import MovieList from '../components/MovieList';
 import Check from '../assets/check_small.png'
 import Comment from '../assets/comment.png'
-import { useNavigate, useSearchParams  } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [movie, setMovie] = useState({});
-  const [moviePop, setMoviePop] = useState({});
-  const [mostPopMovie, setMostPopMovie] = useState({});
-  const [selectedMovie, setselectedMovie] = useState();
+  const [movie, setMovie] = useState([]);
+  const [moviePop, setMoviePop] = useState([]);
+  const [mostPopMovie, setMostPopMovie] = useState([]);
+  const [selectedMovie, setselectedMovie] = useState([]);
   const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
-  const q = searchParams.get("q") || "";
+  const query = searchParams.get('q');
+  const [searchedMovie, setSearchMovie] = useState([]);
+
+
+  useEffect(() => {
+    const fetchSearch = async () => {
+
+      if (!query) {
+        setSearchMovie([])
+        return;
+      }
+
+      const ac = new AbortController();
+      try {
+        const moviesRequest = await axios.get(`http://localhost:5000/api/movies/search?q=${encodeURIComponent(query)}`, { signal: ac.signal });
+        console.log(moviesRequest.data)
+        setSearchMovie(moviesRequest.data)
+
+        console.log(searchedMovie)
+      }
+      catch (error) {
+        console.log(error)
+      }
+      return () => ac.abort();
+    }
+
+    fetchSearch()
+  }, [query])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,8 +53,7 @@ const Home = () => {
           axios.get("http://localhost:5000/api/movies"),
           axios.get("http://localhost:5000/api/movies/popular")
         ])
-        console.log(moviesRes.data)
-        console.log(moviesPopRes.data.movie)
+
         setMovie(moviesRes.data)
         setMoviePop(moviesPopRes.data.movie)
         setMostPopMovie(moviesPopRes.data.mostmovie)
@@ -38,20 +64,9 @@ const Home = () => {
     }
     fetchData()
   }, [])
-
-  useEffect(()=>{
-    try{
-      async ()=>{
-        setselectedMovie(q)
-      }
-    }
-    catch(error){
-      console.log(error)
-    }
-  }, [q])
-
   return (
     <div>
+
       {/* wallpaper */}
       <div className="relative w-screen h-[500px] overflow-hidden">
         <img
@@ -79,9 +94,31 @@ const Home = () => {
       </div>
 
 
-      {/* list หนังหมา */}
-      <MovieList title={selectedMovie} setIsOpen={setIsOpen} movielist={movie} setselectedMovie={setselectedMovie} />
-      <MovieList title="ภาพยนตร์ติด Top" setIsOpen={setIsOpen} movielist={moviePop} setselectedMovie={setselectedMovie} />
+      {
+        searchedMovie.length === 0 && ((searchParams.get("q") ?? "").trim() === "") ?(
+          <>
+            <MovieList
+              title="รับชมต่อ"
+              setIsOpen={setIsOpen}
+              movielist={movie}
+              setselectedMovie={setselectedMovie}
+            />
+            <MovieList
+              title="ภาพยนตร์ติด Top"
+              setIsOpen={setIsOpen}
+              movielist={moviePop}
+              setselectedMovie={setselectedMovie}
+            />
+          </>
+        ) : (
+          <MovieList
+            title="Search"
+            setIsOpen={setIsOpen}
+            movielist={searchedMovie}
+            setselectedMovie={setselectedMovie}
+          />
+        )
+      }
 
       {
         isOpen && (
@@ -117,10 +154,7 @@ const Home = () => {
           </div>
         )
       }
-
-
-
-    </div>
+    </div >
   )
 }
 
