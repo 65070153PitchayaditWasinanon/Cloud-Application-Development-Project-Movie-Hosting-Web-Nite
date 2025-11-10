@@ -1,7 +1,9 @@
 import React, { useState } from 'react'; 
 import IMG from '../assets/preview.png';
+import { useParams } from "react-router-dom";
 
 const Payment = () => {
+    const { id } = useParams(); //อันนี้ id ของ movie 
     const [selectedMethod, setSelectedMethod] = useState('credit_card');
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">

@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import MovieList from '../components/MovieList';
 import Check from '../assets/check_small.png'
 import Comment from '../assets/comment.png'
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams  } from "react-router-dom";
 import axios from "axios";
 
 const Home = () => {
@@ -13,8 +13,12 @@ const Home = () => {
   const [movie, setMovie] = useState({});
   const [moviePop, setMoviePop] = useState({});
   const [mostPopMovie, setMostPopMovie] = useState({});
-  const [selectedMovie, setselectedMovie] = useState({});
+  const [selectedMovie, setselectedMovie] = useState();
   const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+  const q = searchParams.get("q") || "";
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -34,6 +38,18 @@ const Home = () => {
     }
     fetchData()
   }, [])
+
+  useEffect(()=>{
+    try{
+      async ()=>{
+        setselectedMovie(q)
+      }
+    }
+    catch(error){
+      console.log(error)
+    }
+  }, [q])
+
   return (
     <div>
       {/* wallpaper */}
@@ -64,7 +80,7 @@ const Home = () => {
 
 
       {/* list หนังหมา */}
-      <MovieList title="รับชมต่อ" setIsOpen={setIsOpen} movielist={movie} setselectedMovie={setselectedMovie} />
+      <MovieList title={selectedMovie} setIsOpen={setIsOpen} movielist={movie} setselectedMovie={setselectedMovie} />
       <MovieList title="ภาพยนตร์ติด Top" setIsOpen={setIsOpen} movielist={moviePop} setselectedMovie={setselectedMovie} />
 
       {

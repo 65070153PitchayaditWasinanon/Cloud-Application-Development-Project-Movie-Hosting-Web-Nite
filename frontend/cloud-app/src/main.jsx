@@ -18,7 +18,7 @@ createRoot(document.getElementById('root')).render(
   <BrowserRouter> 
     <Routes>
       <Route element={<Navlayout />}>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home />}/>
         <Route path="/payment/:id" element={<Payment />} />
         <Route path="/promotion" element={<Promotion />} />
         <Route path="/review/:id" element={<Review />} />
@@ -28,7 +28,6 @@ createRoot(document.getElementById('root')).render(
         <Route path="/login" element={<Login/>}/>
         <Route path="/register" element={<Register/>}/>
       </Route>
-
     </Routes>
   </BrowserRouter>
 )
