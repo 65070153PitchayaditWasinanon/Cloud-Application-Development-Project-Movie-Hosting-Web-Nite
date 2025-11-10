@@ -11,12 +11,6 @@
     border-radius: 30px;
 }
 
-main {
-    background-image: url(../assets/images/background.png);
-    filter: brightness(80%);
-    overflow: hidden;
-}
-
 #container {
     width: 30%;
     background-color: rgba(255, 255, 255, 0.25);
