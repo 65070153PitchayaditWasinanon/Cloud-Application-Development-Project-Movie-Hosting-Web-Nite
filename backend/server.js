@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User, Movie } from "./model.js";
+import { User, Movie, Promotion } from "./model.js";
 
 dotenv.config();
 
@@ -153,6 +153,16 @@ movieRouter.get("/movies/:id", async (req, res) => {
     const movie = await Movie.findById(req.params.id);
     if (!movie) return res.status(404).json({ message: "Movie not found" });
     res.json(movie);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET ALL Promotion
+movieRouter.get("/promotions", async (req, res) => {
+  try {
+    const promotions = await Promotion.find({});
+    res.json(promotions);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
