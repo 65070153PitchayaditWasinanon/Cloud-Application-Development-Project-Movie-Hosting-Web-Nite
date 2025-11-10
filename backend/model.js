@@ -39,7 +39,8 @@ const movieSchema = new Schema({
   rentalPrice: {
     type: Number,
     required: true
-  }
+  },
+  rentalCount: { type: Number, default: 0 },
 }, { timestamps: true });
 
 const reviewSchema = new Schema({

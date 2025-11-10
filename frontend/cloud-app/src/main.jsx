@@ -19,9 +19,9 @@ createRoot(document.getElementById('root')).render(
     <Routes>
       <Route element={<Navlayout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/payment" element={<Payment />} />
+        <Route path="/payment/:id" element={<Payment />} />
         <Route path="/promotion" element={<Promotion />} />
-        <Route path="/review" element={<Review />} />
+        <Route path="/review/:id" element={<Review />} />
       </Route>
 
       <Route element={<Authlayout />}>

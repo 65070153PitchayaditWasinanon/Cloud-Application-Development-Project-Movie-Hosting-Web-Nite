@@ -1,10 +1,13 @@
 
 // src/pages/Review.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Star from "../assets/Star.png"; // สมมติว่ามีการนำเข้าภาพ Star สำหรับสไตล์
+import { useParams } from "react-router-dom";
+import axios from "axios";
 
 const ReviewPage = () => {
+    const { id } = useParams();
     // State สำหรับเก็บข้อความในฟอร์ม message เก็บข้อความ setMessage คืออัปเดต message useState('')ตั้งค่าเริ่มต้น
     const [message, setMessage] = useState('');
 
@@ -55,7 +58,6 @@ const ReviewPage = () => {
         
         <div className='min-h-screen bg-[#F2F2F2] py-16'>
             <div className="container mx-auto px-4 max-w-6xl">
-                
                 {/* 📌 Header/Movie Review Section (TENET) */}
                 <section className="bg-[#3D4979] text-white p-8 rounded-lg shadow-xl mb-12">
                     <div className="flex items-start space-x-6">
