@@ -52,7 +52,7 @@ userRouter.post("/register", async (req, res) => {
 // Login username หรือ email ก็ได้
 userRouter.post("/login", async (req, res) => {
   try {
-    const { identifier, password } = req.body; 
+    const { identifier, password } = req.body;
     // ใช้ "identifier" เพื่อให้ส่งได้ทั้ง email และ username
 
     // หา email หรือ username ว่ามีมั้ย
@@ -122,30 +122,34 @@ movieRouter.get("/movies", async (req, res) => {
 // GET all movies sort by rental counts
 movieRouter.get("/movies/popular", async (req, res) => {
   try {
-    const movies = await Movie.find({}).sort({rentalCount:-1});
+    const movies = await Movie.find({}).sort({ rentalCount: -1 });
     const MostPopmovies = await Movie.findOne({}).sort({ rentalCount: -1 });
     res.json({
-      movie:movies,
-      mostmovie:MostPopmovies
+      movie: movies,
+      mostmovie: MostPopmovies
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
+
+// GET movie by search
 movieRouter.get("/movies/search", async (req, res) => {
   try {
-    const movies = await Movie.find({}).sort({rentalCount:-1});
-    const MostPopmovies = await Movie.findOne({}).sort({ rentalCount: -1 });
-    res.json({
-      movie:movies,
-      mostmovie:MostPopmovies
-    });
+    const q = (req.query.q || "").trim();
+    if (!q) return res.json([]);  
+    let movies;
+    if (q) {
+      movies = await Movie.find({
+        title: { $regex: q, $options: "i" }
+      })
+    }
+    res.json(movies)
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
-
 
 // GET movie by ID
 movieRouter.get("/movies/:id", async (req, res) => {
@@ -163,3 +167,4 @@ app.use("/api", movieRouter);
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);
 });
+
