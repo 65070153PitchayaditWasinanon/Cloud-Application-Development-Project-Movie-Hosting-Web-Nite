@@ -4,7 +4,7 @@ import Preview from '../assets/preview.png'
 
 
 
-const MovieList = ({ title, setIsOpen }) => {
+const MovieList = ({ title, setIsOpen, movielist, setselectedMovie}) => {
   const rowRef = useRef(null);
   const scrollByCards = (dir = 1) => {
     const row = rowRef.current;
@@ -30,56 +30,21 @@ const MovieList = ({ title, setIsOpen }) => {
           ref={rowRef}
           className="flex overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory space-x-4 p-4 scroll-pl-4"
         >
-          <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" onClick={()=>{
-            setIsOpen(true)
+          {movielist?.map?.((movie) => (
+            <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" key={movie._id} onClick={() => {
+              {
+                setselectedMovie({
+                  id:movie._id,
+                  title:movie.title,
+                  des:movie.description,
+                  img:movie.imagePath
+                })
+              }
+              setIsOpen(true)
             }}>
-            <img src={Preview} alt="" className="w-full h-full object-cover" />
-          </div>
-          <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" onClick={()=>{
-            setIsOpen(true)
-            }}>
-            <img src={Preview} alt="" className="w-full h-full object-cover" />
-          </div>
-                    <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" onClick={()=>{
-            setIsOpen(true)
-            }}>
-            <img src={Preview} alt="" className="w-full h-full object-cover" />
-          </div>
-          <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" onClick={()=>{
-            setIsOpen(true)
-            }}>
-            <img src={Preview} alt="" className="w-full h-full object-cover" />
-          </div>
-                    <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" onClick={()=>{
-            setIsOpen(true)
-            }}>
-            <img src={Preview} alt="" className="w-full h-full object-cover" />
-          </div>
-          <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" onClick={()=>{
-            setIsOpen(true)
-            }}>
-            <img src={Preview} alt="" className="w-full h-full object-cover" />
-          </div>
-                    <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" onClick={()=>{
-            setIsOpen(true)
-            }}>
-            <img src={Preview} alt="" className="w-full h-full object-cover" />
-          </div>
-          <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" onClick={()=>{
-            setIsOpen(true)
-            }}>
-            <img src={Preview} alt="" className="w-full h-full object-cover" />
-          </div>
-                    <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" onClick={()=>{
-            setIsOpen(true)
-            }}>
-            <img src={Preview} alt="" className="w-full h-full object-cover" />
-          </div>
-          <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" onClick={()=>{
-            setIsOpen(true)
-            }}>
-            <img src={Preview} alt="" className="w-full h-full object-cover" />
-          </div>
+              <img src={movie.imagePath} alt="" className="w-full h-full object-cover" />
+            </div>
+          ))}
         </div>
 
         <button

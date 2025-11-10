@@ -119,6 +119,21 @@ movieRouter.get("/movies", async (req, res) => {
   }
 });
 
+// GET all movies sort by rental counts
+movieRouter.get("/movies/popular", async (req, res) => {
+  try {
+    const movies = await Movie.find({}).sort({rentalCount:-1});
+    const MostPopmovies = await Movie.findOne({}).sort({ rentalCount: -1 });
+    res.json({
+      movie:movies,
+      mostmovie:MostPopmovies
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 // GET movie by ID
 movieRouter.get("/movies/:id", async (req, res) => {
   try {
