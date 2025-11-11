@@ -104,7 +104,7 @@ const promotionSchema = new Schema({
 
 const rentalSchema = new Schema({
   userId: { 
-    type: Number, 
+    type: mongoose.Schema.Types.ObjectId, 
     ref: "User", 
     required: true 
   },
@@ -124,7 +124,7 @@ const rentalSchema = new Schema({
 
   movie: {
     movieId: { 
-      type: Number, 
+      type: mongoose.Schema.Types.ObjectId, 
       ref: "Movie", 
       required: true 
     },
@@ -139,10 +139,6 @@ const rentalSchema = new Schema({
   },
 
   payment: {
-    paymentId: { 
-      type: String, 
-      required: true 
-    },
     originalAmount: { 
       type: Number, 
       required: true 

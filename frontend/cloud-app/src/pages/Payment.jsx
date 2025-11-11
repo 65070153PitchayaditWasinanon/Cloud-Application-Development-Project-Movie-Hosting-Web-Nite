@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import IMG from '../assets/preview.png';
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const formatRentalDate = (date) => {
@@ -22,6 +22,8 @@ const Payment = () => {
     const [rentalPeriod, setRentalPeriod] = useState("");
     const [pointsUsedText, setPointsUsedText] = useState("แต้มโปรโมชั่น (5 ฟรี 1)");
     const [pointsRemaining, setPointsRemaining] = useState(0);
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -119,7 +121,7 @@ const Payment = () => {
             navigate('/');
         } catch (error) {
             console.error("Payment failed:", error);
-            alert("การชำระเงินล้มเหลว กรุณาลองใหม่อีกครั้ง");
+            // alert("การชำระเงินล้มเหลว กรุณาลองใหม่อีกครั้ง");
         }
     };
     return (
