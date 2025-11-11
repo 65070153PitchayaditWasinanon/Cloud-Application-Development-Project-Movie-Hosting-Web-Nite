@@ -1,100 +1,128 @@
-
-// src/pages/Review.jsx
-
 import React, { useState, useEffect } from 'react';
-import Star from "../assets/Star.png"; // สมมติว่ามีการนำเข้าภาพ Star สำหรับสไตล์
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import axios from 'axios';
+import Star from "../assets/Star.png";
+
+const API_URL_MOVIE = 'http://localhost:5000/api/movies';
+const API_URL_REVIEW = 'http://localhost:5000/api/reviews';
 
 const ReviewPage = () => {
-    const { id } = useParams();
-    // State สำหรับเก็บข้อความในฟอร์ม message เก็บข้อความ setMessage คืออัปเดต message useState('')ตั้งค่าเริ่มต้น
+    const { id } = useParams(); 
+    const [movie, setMovie] = useState(null);
+    const [comments, setComments] = useState([]);
     const [message, setMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [user, setUser] = useState(null);
 
-    // ข้อมูล Comment มี props คือ author และ content เอาไว้ใช้กับ CommentCard
-    const commentsData = [
-        {
-            author: "Fraction",
-            content: "เอาล่ะ การรอคอยสิ้นสุดลงแล้ว เมื่อเราได้เจอกับหนังไซไฟระทึกขวัญอีกเรื่องที่ทุกคนรอคอยจากคุณโนแลน นั่นคือ..."
-        },
-        {
-            author: "Panda",
-            content: "เอาล่ะ การรอคอยสิ้นสุดลงแล้ว เมื่อเราได้เจอกับหนังไซไฟระทึกขวัญอีกเรื่องที่ทุกคนรอคอยจากคุณโนแลน นั่นคือ Tenet ซึ่งกลับด้านมาจากจำนวน 10 คนที่อ่านเหมือนกันทั้งสองฝ่ายผมเข้าใจว่าทำไมแม้แต่นักวิจารณ์ก็ยังไม่เห็นด้วยกับเรื่องนี้ เพราะหนังไม่ได้ให้เวลาหรือคำอธิบายที่มากพอที่จะทำให้ผู้ชมดื่มด่ำกับประสบการณ์และซาบซึ้งในความงดงามของหนังได้อย่างเต็มที่ ผมดูไปสองรอบแล้ว และพูดได้อย่างมั่นใจว่านี่คือผลงานที่ดีที่สุดของเขานับตั้งแต่ Inception เขาไม่เพียงแต่เล่นกับเวลาอย่างที่เราเห็นใน The Interstellar"
-        },
-        {
-            author: "dapan",
-            content: "เอาล่ะ การรอคอยสิ้นสุดลงแล้ว เมื่อเราได้เจอกับหนังไซไฟระทึกขวัญอีกเรื่องที่ทุกคนรอคอยจากคุณโนแลน นั่นคือ Tenet ซึ่งกลับด้านมาจากจำนวน 10 คนที่อ่านเหมือนกันทั้งสองฝ่ายผมเข้าใจว่าทำไมแม้แต่นักวิจารณ์ก็ยังไม่เห็นด้วยกับเรื่องนี้ เพราะหนังไม่ได้ให้เวลาหรือคำอธิบายที่มากพอที่จะทำให้ผู้ชมดื่มด่ำกับประสบการณ์และซาบซึ้งในความงดงามของหนังได้อย่างเต็มที่ ผมดูไปสองรอบแล้ว และพูดได้อย่างมั่นใจว่านี่คือผลงานที่ดีที่สุดของเขานับตั้งแต่ Inception เขาไม่เพียงแต่เล่นกับเวลาอย่างที่เราเห็นใน The Interstellar"
-        }
-    ];
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const authUserString = localStorage.getItem("authUser");
+                if (!authUserString) {
+                    alert("กรุณาเข้าสู่ระบบก่อนแสดงความคิดเห็น");
+                    return;
+                }
+                const authUser = JSON.parse(authUserString);
+                const userId = authUser._id;
+                const userRes = await axios.get(`http://localhost:5000/api/users/${userId}`);
+                setUser(userRes.data);
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+        fetchUser();
+    }, []);
 
-    // function เมื่อกด submit form 
-    const handleSubmit = (e) => {
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const movieRes = await axios.get(`${API_URL_MOVIE}/${id}`);
+                const reviewRes = await axios.get(`${API_URL_REVIEW}/${id}`);
+                setMovie(movieRes.data);
+                setComments(reviewRes.data);
+                setIsLoading(false);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, [id]);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // **TODO: เพิ่ม Logic สำหรับการส่ง Comment (เช่น API Call) ที่นี่**
-        //แสดงใน log เมื่อมาการ submit
-        console.log('Message sent:', message);
-        //แจ้งเตือนเมื่อกด submit
-        alert(`ส่งข้อความ: "${message}"`);
-        setMessage(''); // ล้างฟอร์มหลังจากส่ง
+
+        if (!user) {
+            alert("กรุณาเข้าสู่ระบบก่อนแสดงความคิดเห็น");
+            return;
+        }
+
+        const newCommentPayload = {
+            movieId: id,
+            userId: user._id,
+            username: user.username,
+            comment: message,
+        };
+
+        try {
+            const response = await axios.post("http://localhost:5000/api/add_reviews", newCommentPayload);
+            setComments([response.data, ...comments]);
+            setMessage('');
+            window.location.reload()
+        } catch (error) {
+            console.error("Error submitting review:", error);
+        }
     };
 
-    //ใช้แสดง commentsData
-    const CommentCard = ({ author, content }) => (
+    const CommentCard = ({ username, comment }) => (
         <div className="bg-white p-6 rounded-lg shadow-md mb-6 border-l-4 border-[#3D4979]">
-            {/* โปรไฟลืและชื่อ */}
             <div className="flex items-center mb-2">
-                {/* อาจจะใช้ Avatar หรือไอคอนแทน bi-instagram */}
                 <div className="w-8 h-8 rounded-full bg-gray-300 mr-3 flex items-center justify-center text-sm font-bold">
-                    {author.charAt(0)}
+                    {username.charAt(0)}
                 </div>
-                <h4 className="text-lg font-bold text-[#3D4979]">{author}</h4>
+                <h4 className="text-lg font-bold text-[#3D4979]">{username}</h4>
             </div>
-            {/* comment */}
-            <p className="text-gray-700">{content}</p>
+            <p className="text-gray-700">{comment}</p>
         </div>
     );
 
+    if (isLoading) return <p className="text-center mt-10">Loading...</p>;
+
     return (
-        
         <div className='min-h-screen bg-[#F2F2F2] py-16'>
             <div className="container mx-auto px-4 max-w-6xl">
-                {/* 📌 Header/Movie Review Section (TENET) */}
-                <section className="bg-[#3D4979] text-white p-8 rounded-lg shadow-xl mb-12">
-                    <div className="flex items-start space-x-6">
-                        <img 
-                            src="https://wallpapers.com/images/hd/tenet-cool-banner-gny44n1wmrqp8ikk.jpg"
-                            className="w-48 h-auto object-cover rounded-lg shadow-lg"
-                            alt="Movie Poster: TENET" 
-                        />
-                        <div>
-                            <h2 className="text-4xl font-extrabold mb-2">TENET</h2>
-                            <p className="text-lg font-light">
-                                ภารกิจของเจ้าหน้าที่ CIA ที่ต้องเดินทางย้อนเวลาเพื่อหยุดยั้งมหาเศรษฐีชาวรัสเซีย อังเดร ซาเตอร์
-                                จากการก่อสงครามโลกครั้งที่ 3 โดยต้องเรียนรู้เทคโนโลยีที่เรียกว่า "การย้อนเวลา"
-                                และทำงานร่วมกับนีล ซึ่งเป็นพันธมิตรคนใหม่
-                            </p>
-                            <div className="flex items-center mt-4">
-                                <img src={Star} alt="Rating Star" className="h-6 w-6 mr-2" />
-                                <span className="font-semibold">Rating: 4.5/5.0</span>
+                {movie && (
+                    <section className="bg-[#3D4979] text-white p-8 rounded-lg shadow-xl mb-12">
+                        <div className="flex items-start space-x-6">
+                            <img
+                                src={movie.posterUrl || movie.imagePath || "https://via.placeholder.com/150"}
+                                className="w-48 h-auto object-cover rounded-lg shadow-lg"
+                                alt={`Movie Poster: ${movie.title}`}
+                            />
+                            <div>
+                                <h2 className="text-4xl font-extrabold mb-2">{movie.title}</h2>
+                                <p className="text-lg font-light">{movie.description}</p>
                             </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                )}
 
-                {/* 📌 Comment Section (Form and Existing Comments) */}
                 <section className="grid md:grid-cols-3 gap-12">
-                    
-                    {/* ➡️ Form Comment */}
                     <div className="md:col-span-1">
                         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-xl sticky top-4">
                             <h3 className="text-3xl font-bold mb-6 text-[#3D4979]">Comment</h3>
+
+                            {user && (
+                                <p className="mb-4 text-gray-600">
+                                    แสดงความคิดเห็นในนาม <span className="font-semibold">{user.username}</span>
+                                </p>
+                            )}
 
                             <div className="mb-4">
                                 <label htmlFor="message" className="block text-gray-700 text-sm font-bold mb-2">
                                     Message
                                 </label>
                                 <textarea
-                                    className="shadow appearance-none border rounded w-full py-3 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline resize-none"
                                     id="message"
                                     name="message"
                                     rows="6"
@@ -102,9 +130,9 @@ const ReviewPage = () => {
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     required
+                                    className="shadow appearance-none border rounded w-full py-3 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline resize-none"
                                 ></textarea>
                             </div>
-
                             <button
                                 type="submit"
                                 className="w-full bg-[#3D4979] hover:bg-[#2A3459] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150"
@@ -114,18 +142,24 @@ const ReviewPage = () => {
                         </form>
                     </div>
 
-                    {/* ⬅️ Existing Comments */}
                     <div className="md:col-span-2">
                         <h3 className="text-3xl font-bold mb-6 text-gray-800 border-b pb-2">User Reviews</h3>
-                        {commentsData.map((comment, index) => (
-                            <CommentCard key={index} author={comment.author} content={comment.content} />
-                        ))}
+                        {comments.length > 0 ? (
+                            comments.map((comment) => (
+                                <CommentCard
+                                    key={comment._id}
+                                    username={comment.username}
+                                    comment={comment.comment}
+                                />
+                            ))
+                        ) : (
+                            <p>No reviews yet.</p>
+                        )}
                     </div>
-
                 </section>
             </div>
         </div>
     );
-}
+};
 
 export default ReviewPage;

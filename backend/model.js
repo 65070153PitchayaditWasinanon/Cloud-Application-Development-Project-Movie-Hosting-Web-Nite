@@ -44,132 +44,120 @@ const movieSchema = new Schema({
 }, { timestamps: true });
 
 const reviewSchema = new Schema({
-  movieId: { 
-    type: Number,  
-    ref: "Movie", 
-    required: true 
+  movieId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Movie",
+    required: true
   },
-  userId: { 
-    type: Number,  
-    ref: "User", 
-    required: true 
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
   },
-  comment: { 
-    type: String, 
-    required: true 
+  comment: {
+    type: String,
+    required: true
   },
-  reviewDate: { 
-    type: Date, 
-    default: Date.now 
+  reviewDate: {
+    type: Date,
+    default: Date.now
   },
-  username: { 
-    type: String 
+  username: {
+    type: String
   },
 }, { timestamps: true });
 
 const promotionSchema = new Schema({
-  name: { 
-    type: String, 
-    required: true 
+  name: {
+    type: String,
+    required: true
   },
-  description: { 
-    type: String 
+  description: {
+    type: String
   },
-  discountType: { 
-    type: String,  
-    required: true 
+  discountType: {
+    type: String,
+    required: true
   },
-  discountValue: { 
-    type: Number, 
-    required: true 
+  discountValue: {
+    type: Number,
+    required: true
   },
-  pointUsage: { 
-    type: Number, 
-    default: 0 
+  pointUsage: {
+    type: Number,
+    default: 0
   },
-  code: { 
-    type: String, 
-    required: true, 
-    unique: true 
+  code: {
+    type: String,
+    required: true,
+    unique: true
   },
-  startDate: { 
-    type: Date, 
-    required: true 
+  startDate: {
+    type: Date,
+    required: true
   },
-  endDate: { 
-    type: Date, 
-    required: true 
+  endDate: {
+    type: Date,
+    required: true
   },
 }, { timestamps: true });
 
 const rentalSchema = new Schema({
-  userId: { 
-    type: Number, 
-    ref: "User", 
-    required: true 
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  status: {
+    type: String,
+    enum: ["ACTIVE", "COMPLETED"],
+    default: "ACTIVE"
   },
-  status: { 
-    type: String, 
-    enum: ["ACTIVE", "COMPLETED"], 
-    default: "ACTIVE" 
+  rentalDate: {
+    type: Date,
+    required: true
   },
-  rentalDate: { 
-    type: Date, 
-    required: true 
-  },
-  dueDate: { 
-    type: Date, 
-    required: true 
+  dueDate: {
+    type: Date,
+    required: true
   },
 
   movie: {
-    movieId: { 
-      type: Number, 
-      ref: "Movie", 
-      required: true 
+    movieId: { type: Schema.Types.ObjectId, ref: "Movie", required: true },
+    title: {
+      type: String,
+      required: true
     },
-    title: { 
-      type: String, 
-      required: true 
-    },
-    rentalPriceAtTime: { 
-      type: Number, 
-      required: true 
+    rentalPriceAtTime: {
+      type: Number,
+      required: true
     },
   },
 
   payment: {
-    paymentId: { 
-      type: String, 
-      required: true 
-    },
     originalAmount: { 
       type: Number, 
       required: true 
     },
-    amountPaid: { 
-      type: Number, 
-      required: true 
+    amountPaid: {
+      type: Number,
+      required: true
     },
-    paymentMethod: { 
-      type: String, 
-      required: true 
+    paymentMethod: {
+      type: String,
+      required: true
     },
-    paymentDate: { 
-      type: Date, 
-      required: true 
+    paymentDate: {
+      type: Date,
+      required: true
     },
     promotionUsed: {
-      promotionId: { 
-        type: String, 
-        ref: "Promotion" 
+      promotionId: {
+        type: String,
+        ref: "Promotion"
       },
-      code: { 
-        type: String 
+      code: {
+        type: String
       },
-      discountAmount: { 
-        type: Number, 
-        default: 0 
+      discountAmount: {
+        type: Number,
+        default: 0
       },
       pointUsage: {
         type: Number,

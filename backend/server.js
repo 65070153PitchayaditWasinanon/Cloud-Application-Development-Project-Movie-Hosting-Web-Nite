@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User, Movie } from "./model.js";
+import { User, Movie, Promotion, Rental, Review } from "./model.js";
 
 dotenv.config();
 
@@ -84,6 +84,7 @@ userRouter.post("/login", async (req, res) => {
 });
 
 
+
 // GET all users (ไม่เอา passwordHash)
 userRouter.get("/users", async (req, res) => {
     try {
@@ -145,7 +146,6 @@ movieRouter.get("/movies/search", async (req, res) => {
                 title: { $regex: q, $options: "i" }
             })
         }
-        res.json(movies)
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -162,7 +162,120 @@ movieRouter.get("/movies/:id", async (req, res) => {
     }
 });
 
+// GET Promotion by CODE
+movieRouter.get("/promotions/:code", async (req, res) => {
+    try {
+        const promotion = await Promotion.findOne({ code: req.params.code })
+        if (!promotion) {
+            return res.status(404).json({ message: "Promotion code not found." });
+        }
+        res.json(promotion);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET ALL Promotion
+movieRouter.get("/promotions", async (req, res) => {
+    try {
+        const promotions = await Promotion.find({});
+        res.json(promotions);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 app.use("/api", movieRouter);
+
+// POST Rental
+const rentalRouter = express.Router();
+rentalRouter.post("/rentals", async (req, res) => {
+    try {
+        const rentalData = req.body;
+        const user = await User.findById(rentalData.userId);
+        console.log("Rental Data:", rentalData);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        await user.save();
+        await Movie.updateOne(
+            { _id: rentalData.movie.movieId },
+            { $inc: { rentalCount: 1 } }
+        );
+        const newRental = new Rental(rentalData);
+        const savedRental = await newRental.save();
+
+        res.status(201).json(savedRental);
+
+    } catch (err) {
+        console.error("Rental creation error:", err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+rentalRouter.get("/checkRental", async (req, res) => {
+    const { userID, movieID } = req.query;
+    console.log(userID, movieID)
+    const rental = await Rental.findOne({
+        userId: new mongoose.Types.ObjectId(String(userID)),
+        "movie.movieId": new mongoose.Types.ObjectId(String(movieID)),
+        dueDate: { $gte: new Date() }
+    })
+
+    if (!rental) {
+        return res.status(200).json({ status: false })
+    }
+
+    return res.status(200).json({ status: true })
+})
+
+app.use("/api", rentalRouter);
+
+const reviewRouter = express.Router();
+
+reviewRouter.get("/reviews/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const reviews = await Review.find({ movieId: id });
+        console.log(reviews);
+        console.log(id);
+        if (!reviews.length)
+            return res.status(404).json({ message: "No reviews found for this movie" });
+
+        res.json(reviews);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+reviewRouter.post("/add_reviews", async (req, res) => {
+    try {
+        const { movieId, userId, username, comment } = req.body;
+
+        const newReview = new Review({
+            movieId,
+            userId,
+            username,
+            comment,
+        });
+
+        await newReview.save();
+
+        res.status(201).json({
+            message: "Review added successfully",
+            review: newReview,
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+
+
+
+
+app.use("/api", movieRouter);
+app.use("/api", reviewRouter);
 
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);

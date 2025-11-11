@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import MovieList from '../components/MovieList';
 import Check from '../assets/check_small.png'
 import Comment from '../assets/comment.png'
+import Eye from '../assets/Eyes.png'
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
@@ -42,6 +43,8 @@ const Home = () => {
       }
       return () => ac.abort();
     }
+
+
 
     fetchSearch()
   }, [query])
@@ -95,7 +98,7 @@ const Home = () => {
 
 
       {
-        searchedMovie.length === 0 && ((searchParams.get("q") ?? "").trim() === "") ?(
+        searchedMovie.length === 0 && ((searchParams.get("q") ?? "").trim() === "") ? (
           <>
             <MovieList
               title="รับชมต่อ"
@@ -139,10 +142,18 @@ const Home = () => {
 
               <div className='flex row-span-1 text-white text-xl space-x-4 justify-end  pr-4 pb-2'>
 
-                <div className='flex items-center' onClick={() => navigate(`/payment/${selectedMovie.id}`)}>
-                  <img src={Check} alt="" className='h-6 w-6' />
-                  <p>Buy</p>
-                </div>
+                {selectedMovie.status ? 
+                  <div className='flex items-center' onClick={() => navigate(`/streaming/${selectedMovie.id}`)}>
+                    <img src={Eye} alt="" className='h-6 w-6 mr-1' />
+                    <p>Watch</p>
+                  </div>                
+                :
+                  <div className='flex items-center' onClick={() => navigate(`/payment/${selectedMovie.id}`)}>
+                    <img src={Check} alt="" className='h-6 w-6' />
+                    <p>Buy</p>
+                  </div>}
+
+
 
                 <div className='flex items-center' onClick={() => navigate(`/review/${selectedMovie.id}`)}>
                   <img src={Comment} alt="" className='h-6 w-6' />

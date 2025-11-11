@@ -1,7 +1,7 @@
 import React from 'react'
 import { useRef, useState } from "react";
 import Preview from '../assets/preview.png'
-
+import axios from 'axios';
 
 
 const MovieList = ({ title, setIsOpen, movielist, setselectedMovie}) => {
@@ -31,13 +31,24 @@ const MovieList = ({ title, setIsOpen, movielist, setselectedMovie}) => {
           className="flex overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory space-x-4 p-4 scroll-pl-4"
         >
           {movielist?.map?.((movie) => (
-            <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" key={movie._id} onClick={() => {
+            <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" key={movie._id} onClick={ async () => {
               {
+                // check ว่าเป็นเจ้าของหรือยัง
+                const user = JSON.parse(localStorage.getItem("authUser"))
+                const movieID  = movie._id
+                const userID = user._id
+                const res = await axios.get(`http://localhost:5000/api/checkRental`,{
+                  params:{
+                    userID,movieID
+                  }
+                });
+                console.log(res.data);
                 setselectedMovie({
-                  id:movie._id,
+                  id:movieID,
                   title:movie.title,
                   des:movie.description,
-                  img:movie.imagePath
+                  img:movie.imagePath,
+                  status:res.data.status
                 })
               }
               setIsOpen(true)

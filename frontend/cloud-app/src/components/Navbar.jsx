@@ -4,9 +4,36 @@ import Home from "../assets/Home.png"
 import Search from "../assets/Search.png"
 import logo from "../assets/logo.png"
 import Gift from "../assets/Gift.png"
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 export default function Navbar() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [text, setText] = useState(searchParams.get("q") || "");
+    const navigate = useNavigate();
+    const [logout, setLogOut] = useState(false)
+    const [user, setUser] = useState("")
+
+    useEffect(() => {
+        //check user
+        const user = localStorage.getItem("authUser")
+        const userToken = localStorage.getItem("authToken")
+        if (!user || !userToken) {
+            navigate("/login");
+        }
+        setUser(JSON.parse(user))
+    }, [logout])
+
+
+    const handle = (value) => {
+        if (value === 'logout') {
+            localStorage.removeItem("authUser");
+            localStorage.removeItem("authToken");
+            setLogOut(true)
+        }
+
+    }
+
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -66,8 +93,9 @@ export default function Navbar() {
                     <select
                         className="bg-transparent focus:outline-none text-gray-700 cursor-pointer"
                         defaultValue=""
+                        onChange={(e) => { handle(e.target.value) }}
                     >
-                        <option value="" hidden>Adam Smith</option>
+                        <option value="" hidden>{user.username}</option>
                         <option value="logout">Logout</option>
                     </select>
                 </div>
