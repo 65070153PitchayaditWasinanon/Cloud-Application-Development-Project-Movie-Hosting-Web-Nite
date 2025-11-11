@@ -14,14 +14,14 @@ export default function RegisterPage() {
         email: "",
         password: ""
     });
-    const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [errorMsg, setErrorMsg] = useState("");
-    const [successMsg, setSuccessMsg] = useState("");
+    const [showPassword, setShowPassword] = useState(false); // สำหรับการแสดงรหัสผ่าน
+    const [loading, setLoading] = useState(false); // สำหรับสถานะการโหลด
+    const [errorMsg, setErrorMsg] = useState(""); // ข้อความแสดง Error
+    const [successMsg, setSuccessMsg] = useState(""); // ข้อความแสดงข้อความสำเร็จเมื่อสมัครสมาชิกสำเร็จ
 
-    const togglePassword = () => setShowPassword((s) => !s);
+    const togglePassword = () => setShowPassword((s) => !s); // สลับการแสดงรหัสผ่าน
 
-    const handleChange = (e) => {
+    const handleChange = (e) => { // ฟังก์ชันจัดการการเปลี่ยนแปลงของ input fields
         const { id, value } = e.target;
         // id values: input_bar_username, input_bar_email, input_bar_password
         if (id === "input_bar_username") setForm((p) => ({ ...p, username: value }));
@@ -29,35 +29,33 @@ export default function RegisterPage() {
         if (id === "input_bar_password") setForm((p) => ({ ...p, password: value }));
     };
 
-    const validate = () => {
-        setErrorMsg("");
-        const { username, email, password } = form;
-        if (!username.trim()) return "กรุณากรอกชื่อผู้ใช้";
-        if (!email.trim()) return "กรุณากรอกอีเมลล์";
-        // simple email regex
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) return "รูปแบบอีเมลล์ไม่ถูกต้อง";
-        if (!password) return "กรุณากรอกรหัสผ่าน";
-        if (password.length < 6) return "รหัสผ่านอย่างน้อย 6 ตัวอักษร";
+    const validate = () => { // ฟังก์ชันตรวจสอบความถูกต้องของฟอร์ม
+        setErrorMsg(""); // ล้างข้อความ Error เดิม
+        const { username, email, password } = form; // ดึงค่าจาก form state
+        if (!username.trim()) return "กรุณากรอกชื่อผู้ใช้"; // ตรวจสอบชื่อผู้ใช้
+        if (!email.trim()) return "กรุณากรอกอีเมลล์"; // ตรวจสอบอีเมลล์
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // รูปแบบอีเมลล์พื้นฐาน
+        if (!emailRegex.test(email)) return "รูปแบบอีเมลล์ไม่ถูกต้อง"; // ตรวจสอบรูปแบบอีเมลล์
+        if (!password) return "กรุณากรอกรหัสผ่าน"; // ตรวจสอบรหัสผ่าน
+        if (password.length < 6) return "รหัสผ่านอย่างน้อย 6 ตัวอักษร"; // ตรวจสอบความยาวรหัสผ่าน
         return null;
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const v = validate();
-        if (v) {
-            setErrorMsg(v);
-            return;
+    const handleSubmit = async (e) => { // ฟังก์ชันเมื่อกดปุ่ม Register
+        e.preventDefault(); //  ป้องกันการรีเฟรชหน้า
+        const v = validate(); // ตรวจสอบความถูกต้องของฟอร์ม
+        if (v) { // ถ้ามีข้อผิดพลาด
+            setErrorMsg(v); // แสดงข้อความ Error
+            return; // ออกจากฟังก์ชัน
         }
 
-        setLoading(true);
-        setErrorMsg("");
-        setSuccessMsg("");
+        setLoading(true); // ตั้งสถานะการโหลดเป็น true
+        setErrorMsg(""); // ล้างข้อความ Error
+        setSuccessMsg(""); // ล้างข้อความเมื่อ Registerสำเร็จ
 
         try {
-            // หาก backend อยู่ต่าง origin: set FULL URL เช่น `${process.env.REACT_APP_API_URL}/api/register`
-            const res = await fetch(`${apiBase}/api/register`, {
-                method: "POST",
+            const res = await fetch(`${apiBase}/api/register`, { // ยิง API ไปที่ localhost:5000/api/register
+                method: "POST", // ใช้เมธอด POST
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -68,14 +66,14 @@ export default function RegisterPage() {
                 })
             });
 
-            const data = await res.json();
+            const data = await res.json(); // รอรับข้อมูลตอบกลับจากเซิร์ฟเวอร์ในรูปแบบ JSON
 
             if (!res.ok) {
                 // server.js ส่ง status 400 หรือ 500 พร้อม message
-                setErrorMsg(data?.message || "เกิดข้อผิดพลาดในการสมัครสมาชิก");
+                setErrorMsg(data?.message || "เกิดข้อผิดพลาดในการสมัครสมาชิก"); // แสดงข้อความ Error
             } else {
                 // สำเร็จ (server.js คืน 201 กับ user info)
-                setSuccessMsg("สมัครสมาชิกสำเร็จ — ไปยังหน้าเข้าสู่ระบบในไม่กี่วินาที");
+                setSuccessMsg("สมัครสมาชิกสำเร็จ — ไปยังหน้าเข้าสู่ระบบในไม่กี่วินาที"); // แสดงข้อความ
                 // ตัวอย่าง: รอสักครู่ให้ผู้ใช้เห็นข้อความ (หรือเปลี่ยนเป็นโอนย้ายทันที)
                 setTimeout(() => {
                     if (navigate) navigate("/login");
@@ -84,9 +82,9 @@ export default function RegisterPage() {
             }
         } catch (err) {
             console.error(err);
-            setErrorMsg("ไม่สามารถติดต่อกับเซิร์ฟเวอร์ได้ โปรดลองอีกครั้ง");
+            setErrorMsg("ไม่สามารถติดต่อกับเซิร์ฟเวอร์ได้ โปรดลองอีกครั้ง"); // แสดงข้อความ Error
         } finally {
-            setLoading(false);
+            setLoading(false); // ตั้งสถานะการโหลดเป็น false
         }
     };
 
