@@ -108,6 +108,7 @@ const Payment = () => {
             calculatedPointDiscount = price;
             calculatedCouponDiscount = 0;
             calculatedFinalPrice = 0;
+
             calculatedPointsRemaining = points - 5;
             calculatedPointsUsedText = "แต้มโปรโมชั่น (ใช้ 5 แต้ม)";
         }
@@ -121,7 +122,6 @@ const Payment = () => {
             calculatedPointsRemaining = points;
         }
 
-        calculatedFinalPrice = price - couponDiscount
         setPointDiscount(calculatedPointDiscount);
         setPointsRemaining(calculatedPointsRemaining);
         setPointsUsedText(calculatedPointsUsedText);
@@ -136,7 +136,7 @@ const Payment = () => {
             dueDate.setMonth(rentalDate.getMonth() + 1);
             const totalDiscount = pointDiscount + couponDiscount;
             const pointsAreUsed = pointDiscount > 0;
-            
+
             const rentalPayload = {
                 userId: user._id,
                 status: "ACTIVE",
