@@ -162,6 +162,19 @@ movieRouter.get("/movies/:id", async (req, res) => {
   }
 });
 
+// GET Promotion by CODE
+movieRouter.get("/promotions/:code", async (req, res) => {
+  try {
+    const promotion = await Promotion.findOne({ code: req.params.code })
+    if (!promotion) {
+      return res.status(404).json({ message: "Promotion code not found." });
+    }
+    res.json(promotion);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // GET ALL Promotion
 movieRouter.get("/promotions", async (req, res) => {
   try {

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import IMG from '../assets/preview.png';
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import CouponModal from '../components/CouponModal';
 
 const formatRentalDate = (date) => {
     const options = {
@@ -18,11 +19,35 @@ const Payment = () => {
     const [selectedMethod, setSelectedMethod] = useState('qr_promptpay');
 
     const [pointDiscount, setPointDiscount] = useState(0);
+    const [couponDiscount, setcouponDiscount] = useState(0);
+    const [error, setError] = useState('');
     const [finalPrice, setFinalPrice] = useState(0);
     const [rentalPeriod, setRentalPeriod] = useState("");
     const [pointsUsedText, setPointsUsedText] = useState("แต้มโปรโมชั่น (5 ฟรี 1)");
     const [pointsRemaining, setPointsRemaining] = useState(0);
+    const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
     const navigate = useNavigate();
+
+    const applyCoupon = async (code) => {
+        try {
+            const [promotionsRes] = await Promise.all([
+                axios.get(`http://localhost:5000/api/promotions/${code}`),
+            ])
+            console.log(promotionsRes.data)
+            let calculatedDiscount;
+            if(promotionsRes.data.discountType == "PERCENTAGE"){
+                calculatedDiscount = movie.rentalPrice*(promotionsRes.data.discountValue/100)
+            }else{
+                calculatedDiscount = promotionsRes.data.discountValue
+            }
+            setcouponDiscount(calculatedDiscount)
+            setIsCouponModalOpen(false);
+        }
+        catch (error) {
+            setError(error.response.data.message)
+            console.log("error", error)
+        }
+    };
 
 
     useEffect(() => {
@@ -32,7 +57,7 @@ const Payment = () => {
                 if (!authUserString) {
                     console.error("User not logged in!");
                     alert("กรุณาเข้าสู่ระบบก่อนทำการชำระเงิน");
-                    navigate('/login'); 
+                    navigate('/login');
                     return;
                 }
                 const authUser = JSON.parse(authUserString);
@@ -44,7 +69,7 @@ const Payment = () => {
                 }
                 const [movieRes, userRes] = await Promise.all([
                     axios.get(`http://localhost:5000/api/movies/${id}`),
-                    axios.get(`http://localhost:5000/api/users/${userId}`) 
+                    axios.get(`http://localhost:5000/api/users/${userId}`)
                 ])
 
                 console.log("Movie Data:", movieRes.data);
@@ -81,12 +106,13 @@ const Payment = () => {
             calculatedPointsRemaining = points - 5;
             calculatedPointsUsedText = "แต้มโปรโมชั่น (ใช้ 5 แต้ม)";
         }
+        calculatedFinalPrice = price - couponDiscount
         setPointDiscount(calculatedPointDiscount);
         setFinalPrice(calculatedFinalPrice);
         setPointsRemaining(calculatedPointsRemaining);
         setPointsUsedText(calculatedPointsUsedText);
 
-    }, [movie, user]);
+    }, [couponDiscount, movie, user]);
 
     const handlePayment = async () => {
         try {
@@ -225,7 +251,14 @@ const Payment = () => {
                     </div>
                     <div className="flex justify-between">
                         <span className="text-gray-300">คูปอง</span>
-                        <span className="cursor-pointer hover:text-gray-200">ใช้คูปอง {'>'}</span>
+                        <span
+                            className="cursor-pointer hover:text-gray-200"
+                            onClick={() => setIsCouponModalOpen(true)}
+                            role="button"
+                            tabIndex={0}
+                        >
+                            ใช้คูปอง {'>'}
+                        </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-gray-300">แต้มโปรโมชั่นที่มี</span>
@@ -243,7 +276,7 @@ const Payment = () => {
                     </div>
                     <div className="flex justify-between">
                         <span className="text-gray-300">คูปองส่วนลด</span>
-                        <span className='text-red-700'>- ฿ 0</span>
+                        <span className='text-red-700'>- ฿ {couponDiscount}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-gray-300">แต้มโปรโมชั่น (5 ฟรี 1)</span>
@@ -266,7 +299,14 @@ const Payment = () => {
                     <span>฿ {finalPrice}</span>
                 </div>
             </div>
-
+            {isCouponModalOpen && (
+                <CouponModal
+                    isOpen={isCouponModalOpen}
+                    onClose={() => setIsCouponModalOpen(false)}
+                    onApply={applyCoupon}
+                    errorfront={error}
+                />
+            )}
         </div>
     );
 };
