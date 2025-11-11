@@ -83,6 +83,20 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
+userRouter.post("/logout", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: "No token" });
+
+  const token = authHeader.split(" ")[1];
+  console.log(token)
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(403).json({ message: "Invalid token" });
+  }
+});
+
 
 // GET all users (ไม่เอา passwordHash)
 userRouter.get("/users", async (req, res) => {
@@ -138,7 +152,7 @@ movieRouter.get("/movies/popular", async (req, res) => {
 movieRouter.get("/movies/search", async (req, res) => {
   try {
     const q = (req.query.q || "").trim();
-    if (!q) return res.json([]);  
+    if (!q) return res.json([]);
     let movies;
     if (q) {
       movies = await Movie.find({
@@ -204,18 +218,18 @@ app.use("/api", rentalRouter);
 const reviewRouter = express.Router();
 
 reviewRouter.get("/reviews/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const reviews = await Review.find({ movieId: id });
-        console.log(reviews);
-        console.log(id);
-        if (!reviews.length)
-            return res.status(404).json({ message: "No reviews found for this movie" });
+  try {
+    const { id } = req.params;
+    const reviews = await Review.find({ movieId: id });
+    console.log(reviews);
+    console.log(id);
+    if (!reviews.length)
+      return res.status(404).json({ message: "No reviews found for this movie" });
 
-        res.json(reviews);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+    res.json(reviews);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 reviewRouter.post("/add_reviews", async (req, res) => {

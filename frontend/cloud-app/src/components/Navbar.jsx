@@ -4,9 +4,42 @@ import Home from "../assets/Home.png"
 import Search from "../assets/Search.png"
 import logo from "../assets/logo.png"
 import Gift from "../assets/Gift.png"
+import axios from "axios";
+
 export default function Navbar() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [text, setText] = useState(searchParams.get("q") || "");
+
+    useEffect(() => {
+        //check user
+        const user = localStorage.getItem("authUser")
+        const userToken = localStorage.getItem("authToken")
+        console.log(user)
+        if (!user || !userToken) {
+            navigate("/login");
+        }
+    }, [])
+
+    const logout = async () => {
+        const userToken = localStorage.getItem("authToken")
+        await axios.post('http://localhost:5000/api/logout',
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${userToken}`
+                }
+            }
+        )
+
+        localStorage.removeItem("authUser");
+        localStorage.removeItem("authToken");
+    }
+
+    const handle = (value) =>{
+        if(value === 'logout')
+            logout();
+    }
+
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -66,6 +99,7 @@ export default function Navbar() {
                     <select
                         className="bg-transparent focus:outline-none text-gray-700 cursor-pointer"
                         defaultValue=""
+                        onChange={(e) =>{ handle(e.target.value)  }}
                     >
                         <option value="" hidden>Adam Smith</option>
                         <option value="logout">Logout</option>
