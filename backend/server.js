@@ -231,7 +231,6 @@ movieRouter.get("/movies/search", async (req, res) => {
         title: { $regex: q, $options: "i" }
       })
     }
-    res.json(movies)
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -280,24 +279,24 @@ rentalRouter.post("/rentals", async (req, res) => {
     const rentalData = req.body;
     const user = await User.findById(rentalData.userId);
     console.log("Rental Data:", rentalData);
+    if (rentalData.payment.promotionUsed && rentalData.payment.promotionUsed.pointUsage > 0) {
+      if (user.promotionPoint >= 5) {
+        user.promotionPoint -= 5;
+      } else {
+        return res.status(400).json({ message: "Insufficient points" });
+      }
+    } else {
+      user.promotionPoint += 1;
+    }
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    await user.save();
-    await Movie.updateOne(
-      { _id: rentalData.movie.movieId },
-      { $inc: { rentalCount: 1 } }
-    );
-    const newRental = new Rental(rentalData);
-    const savedRental = await newRental.save();
-
-    res.status(201).json(savedRental);
-
-  } catch (err) {
-    console.error("Rental creation error:", err);
-    res.status(500).json({ message: err.message });
   }
-});
+  catch (error) {
+    console.log(error)
+  }
+}
+);
 
 rentalRouter.get("/checkRental", async (req, res) => {
   const { userID, movieID } = req.query;
