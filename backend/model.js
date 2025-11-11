@@ -45,12 +45,12 @@ const movieSchema = new Schema({
 
 const reviewSchema = new Schema({
   movieId: { 
-    type: Number,  
+    type: mongoose.Schema.Types.ObjectId,  
     ref: "Movie", 
     required: true 
   },
   userId: { 
-    type: Number,  
+    type: mongoose.Schema.Types.ObjectId,  
     ref: "User", 
     required: true 
   },

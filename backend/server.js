@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User, Movie, Promotion, Rental } from "./model.js";
+import { User, Movie, Promotion, Rental, Review } from "./model.js";
 
 dotenv.config();
 
@@ -200,6 +200,48 @@ rentalRouter.post("/rentals", async (req, res) => {
   }
 });
 app.use("/api", rentalRouter);
+
+const reviewRouter = express.Router();
+
+reviewRouter.get("/reviews/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const reviews = await Review.find({ movieId: id });
+        console.log(reviews);
+        console.log(id);
+        if (!reviews.length)
+            return res.status(404).json({ message: "No reviews found for this movie" });
+
+        res.json(reviews);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+reviewRouter.post("/add_reviews", async (req, res) => {
+  try {
+    const { movieId, userId, username, comment } = req.body;
+
+    const newReview = new Review({
+      movieId,
+      userId,
+      username,
+      comment,
+    });
+
+    await newReview.save();
+
+    res.status(201).json({
+      message: "Review added successfully",
+      review: newReview,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.use("/api", movieRouter);
+app.use("/api", reviewRouter);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);

@@ -84,7 +84,7 @@ export default function LoginPage() {
             localStorage.setItem("authUser", JSON.stringify(user));
 
             if (navigateFallback) {
-                navigateFallback("/home");
+                navigateFallback("/");
             } else {
                 window.location.href = "/";
             }
