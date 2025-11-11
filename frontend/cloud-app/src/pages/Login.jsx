@@ -15,84 +15,62 @@ export default function LoginPage() {
         navigateFallback = null;
     }
 
-    const [identifier, setIdentifier] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-
-    // Safe env detection: support Vite (import.meta.env) and CRA (process.env)
-    const getApiBase = () => {
-        try {
-            // Vite
-            if (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_URL) {
-                return import.meta.env.VITE_API_URL;
-            }
-        } catch (e) {
-            // ignore
-        }
-        try {
-            // CRA / webpack (process may not exist in some setups)
-            if (typeof process !== "undefined" && process.env && process.env.REACT_APP_API_URL) {
-                return process.env.REACT_APP_API_URL;
-            }
-        } catch (e) {
-            // ignore
-        }
-        // fallback: relative path (same origin)
-        return "";
-    };
+    const [identifier, setIdentifier] = useState(""); // Use State ของ Identifier (Username หรือ Email)
+    const [password, setPassword] = useState(""); // Use State ของ รหัสผ่าน ในการ Login
+    const [showPassword, setShowPassword] = useState(false); // Use state ของการแสดงรหัสผ่าน
+    const [loading, setLoading] = useState(false); // Use state ของการโหลด
+    const [error, setError] = useState(""); // Use state ของข้อความแสดงตอนผิดพลาด
 
     const apiBase = "http://localhost:5000"; //getApiBase();
 
-    const togglePassword = () => {
+    const togglePassword = () => { // สลับการแสดงรหัสผ่านจาก Show -> Hide และ Hide -> Show
         setShowPassword((s) => !s);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => { // ฟังก์ชันเมื่อกดปุ่ม Login
         e.preventDefault();
         setError("");
-        if (!identifier.trim() || !password) {
-            setError("กรุณากรอกชื่อผู้ใช้/อีเมล และรหัสผ่าน");
+        if (!identifier.trim() || !password) { // ตรวจสอบว่ากรอกข้อมูลครบหรือไม่
+            setError("กรุณากรอกชื่อผู้ใช้/อีเมล และรหัสผ่าน");   // แสดงข้อความผิดพลาดถ้ากรอกไม่ครบ
             return;
         }
 
-        setLoading(true);
-        try {
-            const res = await fetch(`${apiBase}/api/login`, {
+        setLoading(true);  // ตั้งสถานะการโหลดเป็น true
+        try {   // พยายามส่งข้อมูลไปยังเซิร์ฟเวอร์
+            const res = await fetch(`${apiBase}/api/login`, {   // ยิง API ไปที่ localhost:5000/api/login
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ identifier: identifier.trim(), password }),
+                body: JSON.stringify({ identifier: identifier.trim(), password }), // ส่งข้อมูลในรูปแบบ JSON
             });
 
-            const data = await res.json();
+            const data = await res.json(); // รอรับข้อมูลตอบกลับจากเซิร์ฟเวอร์ในรูปแบบ JSON
 
             if (!res.ok) {
-                setError(data.message || "เกิดข้อผิดพลาดในการล็อกอิน");
-                setLoading(false);
+                setError(data.message || "เกิดข้อผิดพลาดในการล็อกอิน"); // แสดงข้อความ Error ถ้า Login ไม่สำเร็จ
+                setLoading(false);  // ตั้งสถานะการโหลดเป็น false
                 return;
             }
 
-            const { token, user } = data;
-            if (!token) {
-                setError("เซิร์ฟเวอร์ตอบกลับมาไม่ถูกต้อง (ไม่มี token)");
-                setLoading(false);
+            const { token, user } = data; // ดึง token และ user จากข้อมูลที่ได้รับมา
+            if (!token) { // ตรวจสอบว่ามี token หรือไม่
+                setError("เซิร์ฟเวอร์ตอบกลับมาไม่ถูกต้อง (ไม่มี token)"); // แสดงข้อความ Error ถ้าไม่มี token
+                setLoading(false); // ตั้งสถานะการโหลดเป็น false
                 return;
             }
 
-            localStorage.setItem("authToken", token);
-            localStorage.setItem("authUser", JSON.stringify(user));
+            localStorage.setItem("authToken", token); // เก็บ token ใน localStorage
+            localStorage.setItem("authUser", JSON.stringify(user)); // เก็บข้อมูล user ใน localStorage
 
             if (navigateFallback) {
-                navigateFallback("/home");
+                navigateFallback("/home"); // ใช้ react-router นำทางไปที่หน้า /home
             } else {
-                window.location.href = "/";
+                window.location.href = "/"; // ถ้าไม่ได้ใช้ react-router ให้เปลี่ยนหน้าโดยใช้ window.location.href
             }
         } catch (err) {
-            console.error(err);
-            setError("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+            console.error(err); // แสดง Errorใน console
+            setError("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้"); // แสดงข้อความ Error ถ้าไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้
         } finally {
-            setLoading(false);
+            setLoading(false); // ตั้งสถานะการโหลดเป็น false
         }
     };
 
@@ -116,7 +94,7 @@ export default function LoginPage() {
                     />
 
                     {error && (
-                        <div className="mb-4 text-center text-red-600 font-medium">
+                        <div className="mb-4 font-nunito text-center text-red-600 font-medium">
                             {error}
                         </div>
                     )}
