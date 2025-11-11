@@ -131,13 +131,9 @@ const rentalSchema = new Schema({
   },
 
   payment: {
-    paymentId: {
-      type: String,
-      required: true
-    },
-    originalAmount: {
-      type: Number,
-      required: true
+    originalAmount: { 
+      type: Number, 
+      required: true 
     },
     amountPaid: {
       type: Number,

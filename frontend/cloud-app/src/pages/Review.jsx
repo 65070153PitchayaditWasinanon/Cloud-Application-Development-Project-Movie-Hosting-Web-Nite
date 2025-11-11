@@ -6,58 +6,71 @@ import Star from "../assets/Star.png";
 const API_URL_MOVIE = 'http://localhost:5000/api/movies';
 const API_URL_REVIEW = 'http://localhost:5000/api/reviews';
 
-// ข้อมูล login
-const CURRENT_USER_ID = "6740a0dfc2b1b82f5f31d002";
-const CURRENT_USERNAME = "john_doe";
-
 const ReviewPage = () => {
-    const { id } = useParams(); // movieId จาก URL
-    const [movie, setMovie] = useState(null);       // สำหรับรายละเอียดหนัง
-    const [comments, setComments] = useState([]);   // สำหรับรีวิว
+    const { id } = useParams(); 
+    const [movie, setMovie] = useState(null);
+    const [comments, setComments] = useState([]);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const authUserString = localStorage.getItem("authUser");
+                if (!authUserString) {
+                    alert("กรุณาเข้าสู่ระบบก่อนแสดงความคิดเห็น");
+                    return;
+                }
+                const authUser = JSON.parse(authUserString);
+                const userId = authUser._id;
+                const userRes = await axios.get(`http://localhost:5000/api/users/${userId}`);
+                setUser(userRes.data);
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+        fetchUser();
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // ดึงรายละเอียดหนัง
                 const movieRes = await axios.get(`${API_URL_MOVIE}/${id}`);
-                setMovie(movieRes.data);
-
-                // ดึงรีวิวของหนังนี้
                 const reviewRes = await axios.get(`${API_URL_REVIEW}/${id}`);
+                setMovie(movieRes.data);
                 setComments(reviewRes.data);
-
                 setIsLoading(false);
             } catch (error) {
                 console.error("Error fetching data:", error);
-                
                 setIsLoading(false);
             }
         };
-
         fetchData();
     }, [id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!user) {
+            alert("กรุณาเข้าสู่ระบบก่อนแสดงความคิดเห็น");
+            return;
+        }
+
         const newCommentPayload = {
-            movieId: id,             
-            userId: CURRENT_USER_ID, 
-            username: CURRENT_USERNAME,
+            movieId: id,
+            userId: user._id,
+            username: user.username,
             comment: message,
         };
 
-
         try {
             const response = await axios.post("http://localhost:5000/api/add_reviews", newCommentPayload);
-            setComments([response.data, ...comments]); // เพิ่ม comment ใหม่ด้านบน
+            setComments([response.data, ...comments]);
             setMessage('');
-            window.location.reload();
+            window.location.reload()
         } catch (error) {
             console.error("Error submitting review:", error);
-            
         }
     };
 
@@ -82,7 +95,7 @@ const ReviewPage = () => {
                     <section className="bg-[#3D4979] text-white p-8 rounded-lg shadow-xl mb-12">
                         <div className="flex items-start space-x-6">
                             <img
-                                src={movie.posterUrl || "https://via.placeholder.com/150"}
+                                src={movie.posterUrl || movie.imagePath || "https://via.placeholder.com/150"}
                                 className="w-48 h-auto object-cover rounded-lg shadow-lg"
                                 alt={`Movie Poster: ${movie.title}`}
                             />
@@ -98,6 +111,13 @@ const ReviewPage = () => {
                     <div className="md:col-span-1">
                         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-xl sticky top-4">
                             <h3 className="text-3xl font-bold mb-6 text-[#3D4979]">Comment</h3>
+
+                            {user && (
+                                <p className="mb-4 text-gray-600">
+                                    แสดงความคิดเห็นในนาม <span className="font-semibold">{user.username}</span>
+                                </p>
+                            )}
+
                             <div className="mb-4">
                                 <label htmlFor="message" className="block text-gray-700 text-sm font-bold mb-2">
                                     Message
