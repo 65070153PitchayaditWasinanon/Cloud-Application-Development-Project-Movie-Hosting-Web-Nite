@@ -83,19 +83,6 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
-userRouter.post("/logout", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ message: "No token" });
-
-  const token = authHeader.split(" ")[1];
-  console.log(token)
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch {
-    res.status(403).json({ message: "Invalid token" });
-  }
-});
 
 
 // GET all users (ไม่เอา passwordHash)
@@ -213,6 +200,23 @@ rentalRouter.post("/rentals", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+rentalRouter.get("/checkRental", async (req, res)=>{
+  const { userID, movieID } = req.query;
+  console.log(userID, movieID)
+  const rental = await Rental.findOne({
+    userId: new mongoose.Types.ObjectId(String(userID)),
+    "movie.movieId": new mongoose.Types.ObjectId(String(movieID)),
+    dueDate:{$gte:new Date()}
+  })
+
+  if(!rental){
+    return res.status(200).json({status:false})
+  }
+
+  return res.status(200).json({status:true})
+})
+
 app.use("/api", rentalRouter);
 
 const reviewRouter = express.Router();
@@ -253,6 +257,10 @@ reviewRouter.post("/add_reviews", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+
+
+
 
 app.use("/api", movieRouter);
 app.use("/api", reviewRouter);

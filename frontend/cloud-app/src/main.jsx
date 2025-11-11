@@ -12,6 +12,7 @@ import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import Promotion from './pages/Promotion.jsx'
 import Review from './pages/Review.jsx'
+import Watch from './pages/Watch.jsx'
 
 
 createRoot(document.getElementById('root')).render(
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/payment/:id" element={<Payment />} />
         <Route path="/promotion" element={<Promotion />} />
         <Route path="/review/:id" element={<Review />} />
+        <Route path="/streaming/:id" element={<Watch />} />
       </Route>
 
       <Route element={<Authlayout />}>
