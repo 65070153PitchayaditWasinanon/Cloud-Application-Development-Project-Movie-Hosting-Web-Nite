@@ -5,18 +5,103 @@ import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User, Movie, Promotion, Rental, Review } from "./model.js";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import multer from "multer";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+const upload = multer({ storage: multer.memoryStorage() }); // เก็บไฟล์ใน RAM ชั่วคราว
 
 // เชื่อม MongoDB (เปลี่ยนตอนใช้ DynamoDB)
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB error:", err));
+
+
+//aws service sdk
+const s3 = new S3Client({
+  region: "us-east-1",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    sessionToken: process.env.AWS_SESSION_TOKEN
+  },
+});
+
+const dynamodb = new DynamoDBClient({ region: "ap-southeast-1" });
+
+
+const awsRouter = express.Router();
+
+awsRouter.post("/test-upload", async (req, res) => {
+  try {
+    const key = "test/test.txt"; // ชื่อไฟล์ใน S3
+    const content = "Hello from Express!"; // เนื้อหาไฟล์
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: process.env.S3_BUCKET_RAW,
+        Key: key,
+        Body: content,
+        ContentType: "text/plain",
+      })
+    );
+
+    res.json({
+      ok: true,
+      message: "Upload success",
+      s3Url: `https://${process.env.S3_BUCKET_RAW}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+
+app.post("/upload-video", upload.single("video"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ ok: false, message: "No file uploaded" });
+    }
+
+    const key = `uploads/${Date.now()}_${req.file.originalname}`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: process.env.S3_BUCKET_RAW,
+        Key: key,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype || "video/mp4",
+      })
+    );
+
+    const url = `https://${process.env.S3_BUCKET_RAW}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+
+    res.json({
+      ok: true,
+      message: "Upload success",
+      s3Url: url,
+      key,
+    });
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+
+
+
+app.use("/api", awsRouter);
+
+
+
 
 const userRouter = express.Router();
 
@@ -214,20 +299,20 @@ rentalRouter.post("/rentals", async (req, res) => {
   }
 });
 
-rentalRouter.get("/checkRental", async (req, res)=>{
+rentalRouter.get("/checkRental", async (req, res) => {
   const { userID, movieID } = req.query;
   console.log(userID, movieID)
   const rental = await Rental.findOne({
     userId: new mongoose.Types.ObjectId(String(userID)),
     "movie.movieId": new mongoose.Types.ObjectId(String(movieID)),
-    dueDate:{$gte:new Date()}
+    dueDate: { $gte: new Date() }
   })
 
-  if(!rental){
-    return res.status(200).json({status:false})
+  if (!rental) {
+    return res.status(200).json({ status: false })
   }
 
-  return res.status(200).json({status:true})
+  return res.status(200).json({ status: true })
 })
 
 app.use("/api", rentalRouter);

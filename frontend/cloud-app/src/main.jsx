@@ -13,7 +13,7 @@ import Register from './pages/Register.jsx'
 import Promotion from './pages/Promotion.jsx'
 import Review from './pages/Review.jsx'
 import Watch from './pages/Watch.jsx'
-
+import Upload from './pages/Upload.jsx'
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter> 
@@ -24,6 +24,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/promotion" element={<Promotion />} />
         <Route path="/review/:id" element={<Review />} />
         <Route path="/streaming/:id" element={<Watch />} />
+        <Route path="/upload" element={<Upload />} />
       </Route>
 
       <Route element={<Authlayout />}>
