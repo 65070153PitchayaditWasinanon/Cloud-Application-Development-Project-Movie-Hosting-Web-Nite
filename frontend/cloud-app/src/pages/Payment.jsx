@@ -26,6 +26,8 @@ const Payment = () => {
     const [pointsUsedText, setPointsUsedText] = useState("แต้มโปรโมชั่น (5 ฟรี 1)");
     const [pointsRemaining, setPointsRemaining] = useState(0);
     const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+    const [appliedCouponCode, setAppliedCouponCode] = useState("");
+
     const navigate = useNavigate();
 
     const applyCoupon = async (code) => {
@@ -35,12 +37,13 @@ const Payment = () => {
             ])
             console.log(promotionsRes.data)
             let calculatedDiscount;
-            if(promotionsRes.data.discountType == "PERCENTAGE"){
-                calculatedDiscount = movie.rentalPrice*(promotionsRes.data.discountValue/100)
-            }else{
+            if (promotionsRes.data.discountType == "PERCENTAGE") {
+                calculatedDiscount = movie.rentalPrice * (promotionsRes.data.discountValue / 100)
+            } else {
                 calculatedDiscount = promotionsRes.data.discountValue
             }
             setcouponDiscount(calculatedDiscount)
+            setAppliedCouponCode(code);
             setIsCouponModalOpen(false);
         }
         catch (error) {
@@ -97,20 +100,32 @@ const Payment = () => {
         const price = movie.rentalPrice || 0;
         const points = user.promotionPoint || 0;
         let calculatedPointDiscount = 0;
+        let calculatedCouponDiscount = couponDiscount;
         let calculatedFinalPrice = price;
         let calculatedPointsRemaining = points;
         let calculatedPointsUsedText = "แต้มโปรโมชั่น (5 ฟรี 1)";
         if (points >= 5 && price > 0) {
             calculatedPointDiscount = price;
+            calculatedCouponDiscount = 0;
             calculatedFinalPrice = 0;
             calculatedPointsRemaining = points - 5;
             calculatedPointsUsedText = "แต้มโปรโมชั่น (ใช้ 5 แต้ม)";
         }
+        else if (calculatedCouponDiscount > 0) {
+            calculatedPointDiscount = 0;
+            calculatedFinalPrice = Math.max(0, price - calculatedCouponDiscount);
+            calculatedPointsRemaining = points;
+        }
+        else {
+            calculatedFinalPrice = price;
+            calculatedPointsRemaining = points;
+        }
+
         calculatedFinalPrice = price - couponDiscount
         setPointDiscount(calculatedPointDiscount);
-        setFinalPrice(calculatedFinalPrice);
         setPointsRemaining(calculatedPointsRemaining);
         setPointsUsedText(calculatedPointsUsedText);
+        setFinalPrice(calculatedFinalPrice);
 
     }, [couponDiscount, movie, user]);
 
@@ -119,7 +134,9 @@ const Payment = () => {
             const rentalDate = new Date();
             const dueDate = new Date();
             dueDate.setMonth(rentalDate.getMonth() + 1);
-
+            const totalDiscount = pointDiscount + couponDiscount;
+            const pointsAreUsed = pointDiscount > 0;
+            
             const rentalPayload = {
                 userId: user._id,
                 status: "ACTIVE",
@@ -135,10 +152,10 @@ const Payment = () => {
                     amountPaid: finalPrice,
                     paymentMethod: selectedMethod,
                     paymentDate: rentalDate.toISOString(),
-                    promotionUsed: pointDiscount > 0 ? {
-                        code: "",
-                        discountAmount: pointDiscount,
-                        pointUsage: 5
+                    promotionUsed: (totalDiscount > 0) ? {
+                        code: appliedCouponCode,
+                        discountAmount: totalDiscount,
+                        pointUsage: pointsAreUsed ? 5 : 0
                     } : null
                 }
             };
@@ -147,7 +164,7 @@ const Payment = () => {
             navigate('/');
         } catch (error) {
             console.error("Payment failed:", error);
-            // alert("การชำระเงินล้มเหลว กรุณาลองใหม่อีกครั้ง");
+            alert("การชำระเงินล้มเหลว กรุณาลองใหม่อีกครั้ง");
         }
     };
     return (
@@ -218,7 +235,7 @@ const Payment = () => {
 
                 </div>
                 <button
-                    onClick={handlePayment} // <-- เพิ่ม onClick
+                    onClick={handlePayment}
                     className="w-full font-bold bg-[#3D4979] text-white py-3 rounded-lg mt-8  text-lg ">
                     ชำระเงิน
                 </button>
@@ -257,7 +274,7 @@ const Payment = () => {
                             role="button"
                             tabIndex={0}
                         >
-                            ใช้คูปอง {'>'}
+                            {appliedCouponCode ? appliedCouponCode : <>ใช้คูปอง {'>'}</>}
                         </span>
                     </div>
                     <div className="flex justify-between">

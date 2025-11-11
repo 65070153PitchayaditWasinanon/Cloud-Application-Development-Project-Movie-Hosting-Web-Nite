@@ -195,6 +195,15 @@ rentalRouter.post("/rentals", async (req, res) => {
     const rentalData = req.body;
     const user = await User.findById(rentalData.userId);
     console.log("Rental Data:", rentalData);
+    if (rentalData.payment.promotionUsed && rentalData.payment.promotionUsed.pointUsage > 0) {
+      if (user.promotionPoint >= 5) {
+        user.promotionPoint -= 5;
+      } else {
+        return res.status(400).json({ message: "Insufficient points" });
+      }
+    } else {
+      user.promotionPoint += 1;
+    }
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -214,20 +223,20 @@ rentalRouter.post("/rentals", async (req, res) => {
   }
 });
 
-rentalRouter.get("/checkRental", async (req, res)=>{
+rentalRouter.get("/checkRental", async (req, res) => {
   const { userID, movieID } = req.query;
   console.log(userID, movieID)
   const rental = await Rental.findOne({
     userId: new mongoose.Types.ObjectId(String(userID)),
     "movie.movieId": new mongoose.Types.ObjectId(String(movieID)),
-    dueDate:{$gte:new Date()}
+    dueDate: { $gte: new Date() }
   })
 
-  if(!rental){
-    return res.status(200).json({status:false})
+  if (!rental) {
+    return res.status(200).json({ status: false })
   }
 
-  return res.status(200).json({status:true})
+  return res.status(200).json({ status: true })
 })
 
 app.use("/api", rentalRouter);
