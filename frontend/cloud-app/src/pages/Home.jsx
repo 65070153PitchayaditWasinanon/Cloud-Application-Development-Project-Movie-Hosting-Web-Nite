@@ -32,11 +32,11 @@ const Home = () => {
 
       const ac = new AbortController();
       try {
-        const moviesRequest = await axios.get(`http://localhost:5000/api/movies/search?q=${encodeURIComponent(query)}`, { signal: ac.signal });
+        const moviesRequest = await axios.get(`http://localhost:5000/api/moviessearch?q=${encodeURIComponent(query)}`, { signal: ac.signal });
         console.log(moviesRequest.data)
         setSearchMovie(moviesRequest.data)
 
-        console.log(searchedMovie)
+        console.log(selectedMovie)
       }
       catch (error) {
         console.log(error)
@@ -54,7 +54,7 @@ const Home = () => {
       try {
         const [moviesRes, moviesPopRes] = await Promise.all([
           axios.get("http://localhost:5000/api/movies"),
-          axios.get("http://localhost:5000/api/movies/popular")
+          axios.get("http://localhost:5000/api/moviespopular")
         ])
 
         setMovie(moviesRes.data)
@@ -83,7 +83,7 @@ const Home = () => {
           <p className="text-base leading-relaxed">{mostPopMovie.description}</p>
           <button onClick={() => {
             setselectedMovie({
-              id: mostPopMovie._id,
+              id: mostPopMovie.movieId,
               title: mostPopMovie.title,
               des: mostPopMovie.description,
               img: mostPopMovie.imagePath
@@ -150,7 +150,7 @@ const Home = () => {
                 :
                   <div className='flex items-center' onClick={() => navigate(`/payment/${selectedMovie.id}`)}>
                     <img src={Check} alt="" className='h-6 w-6' />
-                    <p>Buy</p>
+                    <p>Buy {selectedMovie.status}</p>
                   </div>}
 
 

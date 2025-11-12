@@ -18,6 +18,7 @@ export default function Navbar() {
         //check user
         const user = localStorage.getItem("authUser")
         const userToken = localStorage.getItem("authToken")
+        console.log(user)
         if (!user || !userToken) {
             navigate("/login");
         }

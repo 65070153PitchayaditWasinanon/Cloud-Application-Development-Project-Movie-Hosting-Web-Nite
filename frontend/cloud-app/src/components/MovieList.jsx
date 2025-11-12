@@ -31,20 +31,20 @@ const MovieList = ({ title, setIsOpen, movielist, setselectedMovie}) => {
           className="flex overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory space-x-4 p-4 scroll-pl-4"
         >
           {movielist?.map?.((movie) => (
-            <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" key={movie._id} onClick={ async () => {
+            <div className="w-80 h-40 shrink-0 snap-start rounded-lg overflow-hidden" key={movie.movieId} onClick={ async () => {
               {
                 // check ว่าเป็นเจ้าของหรือยัง
                 const user = JSON.parse(localStorage.getItem("authUser"))
-                const movieID  = movie._id
-                const userID = user._id
+                const movieID  = movie.movieId
+                const userID = user.userId
                 const res = await axios.get(`http://localhost:5000/api/checkRental`,{
                   params:{
                     userID,movieID
                   }
                 });
-                console.log(res.data);
+                console.log(res.data.status);
                 setselectedMovie({
-                  id:movieID,
+                  id:movie.movieId,
                   title:movie.title,
                   des:movie.description,
                   img:movie.imagePath,

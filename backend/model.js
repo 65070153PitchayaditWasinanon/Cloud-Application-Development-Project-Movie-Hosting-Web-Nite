@@ -40,6 +40,10 @@ const movieSchema = new Schema({
     type: Number,
     required: true
   },
+  moviePath: {
+    type: String,
+    required: true
+  },
   rentalCount: { type: Number, default: 0 },
 }, { timestamps: true });
 

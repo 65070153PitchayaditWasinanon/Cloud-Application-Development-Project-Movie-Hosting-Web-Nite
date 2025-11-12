@@ -64,7 +64,7 @@ const Payment = () => {
                     return;
                 }
                 const authUser = JSON.parse(authUserString);
-                const userId = authUser._id;
+                const userId = authUser.userId;
                 if (!userId) {
                     console.error("User ID not found in localStorage!");
                     navigate('/login');
@@ -138,12 +138,12 @@ const Payment = () => {
             const pointsAreUsed = pointDiscount > 0;
 
             const rentalPayload = {
-                userId: user._id,
+                userId: user.userId,
                 status: "ACTIVE",
                 rentalDate: rentalDate.toISOString(),
                 dueDate: dueDate.toISOString(),
                 movie: {
-                    movieId: movie._id,
+                    movieId: movie.movieId,
                     title: movie.title,
                     rentalPriceAtTime: movie.rentalPrice
                 },
@@ -173,7 +173,7 @@ const Payment = () => {
             <div className="flex-grow p-8 lg:p-16">
                 <div className="mb-11 w-sm ">
                     <div className="flex gap-4 items-center ">
-                        <button className="text-3xl font-bold text-gray-600 cursor-pointer">
+                        <button className="text-3xl font-bold text-gray-600 cursor-pointer" onClick={()=>{navigate('/')}}>
                             &lt;
                         </button>
 
