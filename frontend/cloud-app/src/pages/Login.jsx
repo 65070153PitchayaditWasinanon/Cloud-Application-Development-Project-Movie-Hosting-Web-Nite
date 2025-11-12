@@ -62,7 +62,7 @@ export default function LoginPage() {
             localStorage.setItem("authUser", JSON.stringify(user)); // เก็บข้อมูล user ใน localStorage
 
             if (navigateFallback) {
-                navigateFallback("/home"); // ใช้ react-router นำทางไปที่หน้า /home
+                navigateFallback("/"); // ใช้ react-router นำทางไปที่หน้า /home
             } else {
                 window.location.href = "/"; // ถ้าไม่ได้ใช้ react-router ให้เปลี่ยนหน้าโดยใช้ window.location.href
             }
