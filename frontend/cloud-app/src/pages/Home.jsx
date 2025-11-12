@@ -57,9 +57,25 @@ const Home = () => {
           axios.get("http://localhost:5000/api/moviespopular")
         ])
 
+
         setMovie(moviesRes.data)
         setMoviePop(moviesPopRes.data.movie)
         setMostPopMovie(moviesPopRes.data.mostmovie)
+        const movieID = moviesPopRes.data.mostmovie.movieId
+        const user = JSON.parse(localStorage.getItem("authUser"))
+        const userID = user.userId
+
+        const res = await axios.get(`http://localhost:5000/api/checkRental`, {
+          params: {
+            userID, movieID
+          }
+        })
+        setMostPopMovie(prev => ({
+          ...prev,             
+          status: res.data.status 
+        }));
+
+
       }
       catch (error) {
         console.log("error", error)
@@ -86,7 +102,9 @@ const Home = () => {
               id: mostPopMovie.movieId,
               title: mostPopMovie.title,
               des: mostPopMovie.description,
-              img: mostPopMovie.imagePath
+              img: mostPopMovie.imagePath,
+              status: mostPopMovie.status
+
             })
             setIsOpen(true)
           }} className="flex flex-row bg-white text-black py-2 px-6 items-center gap-2 rounded-lg font-semibold hover:bg-gray-300">
@@ -142,12 +160,12 @@ const Home = () => {
 
               <div className='flex row-span-1 text-white text-xl space-x-4 justify-end  pr-4 pb-2'>
 
-                {selectedMovie.status ? 
+                {selectedMovie.status  ?
                   <div className='flex items-center' onClick={() => navigate(`/streaming/${selectedMovie.id}`)}>
                     <img src={Eye} alt="" className='h-6 w-6 mr-1' />
                     <p>Watch</p>
-                  </div>                
-                :
+                  </div>
+                  :
                   <div className='flex items-center' onClick={() => navigate(`/payment/${selectedMovie.id}`)}>
                     <img src={Check} alt="" className='h-6 w-6' />
                     <p>Buy {selectedMovie.status}</p>

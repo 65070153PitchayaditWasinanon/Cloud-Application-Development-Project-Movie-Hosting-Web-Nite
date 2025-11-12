@@ -678,7 +678,7 @@ app.post("/api/upload", upload.single("videoFile"), async (req, res) => {
 app.get("/api/checkRental", async (req, res) => {
     try {
         const { userID, movieID } = req.query;
-
+        console.log(movieID)
         if (!userID || !movieID) {
             return res.status(400).json({ message: "userID and movieID are required" });
         }
