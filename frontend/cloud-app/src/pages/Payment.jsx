@@ -38,7 +38,7 @@ const Payment = () => {
             console.log(promotionsRes.data)
             let calculatedDiscount;
             if (promotionsRes.data.discountType == "PERCENTAGE") {
-                calculatedDiscount = movie.rentalPrice * (promotionsRes.data.discountValue / 100)
+                calculatedDiscount = Math.ceil(movie.rentalPrice * (promotionsRes.data.discountValue / 100))
             } else {
                 calculatedDiscount = promotionsRes.data.discountValue
             }
@@ -250,7 +250,7 @@ const Payment = () => {
                     <img
                         src={movie.imagePath}
                         alt={movie.title}
-                        className="rounded-lg"
+                        className="rounded-lg w-[200px] h-[150px] object-cover"
                     />
                     <div>
                         <h3 className="text-xl font-semibold">{movie.title}</h3>
