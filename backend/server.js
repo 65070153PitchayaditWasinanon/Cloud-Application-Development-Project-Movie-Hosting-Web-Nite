@@ -391,9 +391,17 @@ app.post("/api/rentals", async (req, res) => {
         const now = new Date();
         const dueDate = new Date(now);
         dueDate.setDate(now.getDate() + 3); // หมดอายุใน 3 วัน (เปลี่ยนได้)
-        await Movie.updateOne(
-            { _id: rentalData.movie.movieId },
-            { $inc: { rentalCount: 1 } }
+        const movieId = movie.movieId
+        await docClient.send(
+            new UpdateCommand({
+                TableName: MOVIES_TABLE,
+                Key: { movieId },
+                UpdateExpression:
+                    "SET rentalCount = rentalCount + :incr",
+                ExpressionAttributeValues: {
+                    ":incr": 1
+                },
+            })
         );
         const newRental = {
             rentalId,
