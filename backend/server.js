@@ -123,41 +123,47 @@ app.post("/api/register", async (req, res) => {
 
 // Login (identifier = email or username)
 app.post("/api/login", async (req, res) => {
-    try {
-        const { identifier, password } = req.body;
-        if (!identifier || !password)
-            return res.status(400).json({ message: "identifier and password required" });
+  try {
+    const { identifier, password } = req.body;
+    if (!identifier || !password)
+      return res.status(400).json({ message: "identifier and password required" });
 
-        // scan for user by email or username
-        const scanRes = await docClient.send(
-            new ScanCommand({
-                TableName: USERS_TABLE,
-                FilterExpression: "email = :id OR username = :id",
-                ExpressionAttributeValues: { ":id": identifier },
-                Limit: 1,
-            })
-        );
+    // สแกนทั้งตารางเพื่อหา user ที่ email หรือ username ตรง
+    const scanRes = await docClient.send(
+      new ScanCommand({
+        TableName: USERS_TABLE,
+        FilterExpression: "email = :id OR username = :id",
+        ExpressionAttributeValues: { ":id": identifier },
+      })
+    );
 
-        const user = scanRes.Items && scanRes.Items[0];
-        if (!user) return res.status(400).json({ message: "Invalid username/email or password" });
+    const user = scanRes.Items && scanRes.Items[0];
+    if (!user)
+      return res.status(400).json({ message: "Invalid username/email or password" });
 
-        const isMatch = await bcrypt.compare(password, user.passwordHash);
-        if (!isMatch) return res.status(400).json({ message: "Invalid username/email or password" });
+    // ตรวจสอบรหัสผ่าน
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid username/email or password" });
 
-        const token = jwt.sign({ id: user.userId, email: user.email }, process.env.JWT_SECRET || "secretkey", {
-            expiresIn: "1h",
-        });
+    // สร้าง JWT token
+    const token = jwt.sign(
+      { id: user.userId, email: user.email },
+      process.env.JWT_SECRET || "secretkey",
+      { expiresIn: "1h" }
+    );
 
-        res.json({
-            message: "Login successful",
-            token,
-            user: { userId: user.userId, username: user.username, email: user.email },
-        });
-    } catch (err) {
-        console.error("Login error:", err);
-        res.status(500).json({ message: err.message });
-    }
+    res.json({
+      message: "Login successful",
+      token,
+      user: { userId: user.userId, username: user.username, email: user.email },
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ message: err.message });
+  }
 });
+
 
 
 // GET all users (exclude passwordHash)

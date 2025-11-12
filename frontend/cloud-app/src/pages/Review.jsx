@@ -23,7 +23,7 @@ const ReviewPage = () => {
                     return;
                 }
                 const authUser = JSON.parse(authUserString);
-                const userId = authUser._id;
+                const userId = authUser.userId;
                 const userRes = await axios.get(`http://localhost:5000/api/users/${userId}`);
                 setUser(userRes.data);
             } catch (error) {
@@ -59,7 +59,7 @@ const ReviewPage = () => {
 
         const newCommentPayload = {
             movieId: id,
-            userId: user._id,
+            userId: user.userId,
             username: user.username,
             comment: message,
         };
@@ -147,7 +147,7 @@ const ReviewPage = () => {
                         {comments.length > 0 ? (
                             comments.map((comment) => (
                                 <CommentCard
-                                    key={comment._id}
+                                    key={comment.userId}
                                     username={comment.username}
                                     comment={comment.comment}
                                 />
